@@ -1,4 +1,6 @@
-# JSF en pocas palabras
+# JSF Clase 1
+
+## JSF en pocas palabras
 
 No usamos el viejo estilo de sintaxis jsp; nuestras páginas usarán xhtml (1), 
 en el que definimos un namespace  xmlns:h="http://java.sun.com/jsf/html".
@@ -141,11 +143,69 @@ conozca las *seis faces del ciclo de vida de JSF*
 5. Invoke application
 6. Render response
 
-[Leanpub](https://balusc.blogspot.com.es/2006/09/debug-jsf-lifecycle.html)
+[JSF ciclco de vida](https://balusc.blogspot.com.es/2006/09/debug-jsf-lifecycle.html)
 
 Antes de pasar al detalle de las faces del ciclo interesa tener presente como vas a intervenir.   
 Cómo primera cuestión habrás instalado una *implementación* de la especificación de referencia
-de JSF, conocida como JSF RI. Mojarra es el nombre de la actual JSF RI, y es la implementación
+fde JSF, conocida como JSF RI. Mojarra es el nombre de la actual JSF RI, y es la implementación
 de que viene con servidores como Glassfish entre otros.
 
+Cuando alguien comienza a estudiar y comprender como trabaja JSF, ya viene con alguna práctica realizada
+con la API servlet y el uso de técnicas que pretenden eliminar código Java de las vistas, es decir, normalmente
+se conoce los scriptlets; es decir sabe que existen estándares Java destinados ha organizar mejor el código y
+hacer más productivo el desarrollo de aplicaciones, nos referimos a los estándares Expression Language y la
+librería JSTL. Ahora, que comenzamos a estudiar JSF es buen momento para preguntarnos:
+*¿Los servlets no tienen damasiadas responsibilidades?*
+Visto que obtiene los datos de las peticiones HTTP, los convierte si es necesario, los valida, los pone a
+disposición de las páginas JSP agregando nuevos atributos al objeto request y despachándolo (forward).
 
+Partimos del hecho que un framework como JSF, un conjunto de componentes específicos para alcanzar las tareas
+de la aplicación y un ciclo de vida o flujo bien concreto.
+
+JSF no es un framework basado en componentes y no en acciones como CodeIgniter; en el momento que JSF surgió rompió con
+la costumbre de la época, tenía una forma muy diferente, el "status quo" del momento estaba basado en acciones.
+En principios, si analizamos el código xhtml, podemos resaltar:
+
+## Un framework statefull
+
+cuando desarrollamos con un framework basado en acción tenemos 'tags' que nos ayudan en el desarrollo de la vista, y podemos pensar que está ligado, lo que si
+quieres quitar las tags y hacerlo a mano lo consigues.
+cuando submit un formulario basado en acción, nuestra app basada en la aciión no se fija en el estado de la vista.
+no es tenido en cuenta como ella fue escrita, tampoco si es un html estático o un jsp. Se montará una petición que tiene como parámetro est e y este otro dato, que los aportó el usuario en el formulario.
+los frameworks basados en ación no conocen un formulario, conocen la request y la información que está siendo pasada en ella.
+
+cuando trabajamos con JSF,él es quien crea el formulario, es decir cuando llamamos a nuestra pagina.xhtml en lugar de ejecutar un servlet, JSF va a leer el archivo y lo monta en memoria, crea un arbol de componentes; luego ese arbol den memoria he pasado por un renderizador.
+con lo que el arbol de componentes representa la estructura de la página y que JSF utilizará para escribir el HTML, en un momento del ciclo de vida.
+
+JSF, guarda en memoria el árbol que fue usado para generar ese formulario.
+Esto no ocure en un servlet, que genera automáticamente un HTML a partir de un JSP, esto lo hace el servidor para enviar datos al cliente, es para esto que que tiene en cuenta el formulario, para enviarlo, lo mismo es en los frameworks
+basado en acción, mientras que JSF, al guardar en memoria la estructura de la página, en ese árbol de componentes, él va a comparar cada atributo de la petición con los campos que estaban disponibles para el usaurio.
+Teniendo toda esta información JSF, podrá validar los datos enviados por el usuario. Se puede decir que JSF sabe  todo acerca de un formulario, que había que hay ahora que el usuario envió datos, JSF conoce el estado de la vista y lo mantine a través de las peticiones , por ello pdoemos considerarlo un framework 'statefull'.
+
+Con esto en este mento podríamos ver todo el flujo de mensajes y como van entrando los actores en la escena, proponemos el código de baslsuc.
+
+Vistas las responsabilidades de cada una de las seis fases de JSF, podríamos
+ahora solicitar a JSF que nos notifique en cada cambio de fase, mediante un
+PhaseListener.   
+
+Utilizamos un PhaseListener en la misma situación que usaríamos un *filtro*, javax.servlet.Filter, nuestro objetivo es ser avisados antes y después de cada fase, con esto estaremos obteniendo un acceso granular a un punto concreto del ciclo de vida de una petición.
+
+---
+That class already exist in Java SE API: java.net.URL.
+
+InputStream input = new URL("http://localhost/context/page.jsf").openStream();
+--> esta es el HTML generado por JSF
+
+
+Aqui está el ejemplo Listener en ciclo vida 'example':
+
+http://www.itcuties.com/j2ee/jsf-phaselistener/
+
+Y este es otro ejemplo:
+
+http://www.devmanuals.com/tutorials/java/jsf/jsf2TagLibrary/core/phaseListener.html
+
+
+--
+
+--
