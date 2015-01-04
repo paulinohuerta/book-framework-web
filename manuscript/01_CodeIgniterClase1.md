@@ -1,48 +1,54 @@
 # CodeIgniter Clase 1
 
+Se espera que antes de comenzar la lectura de estas clases, tomes un contacto con el sitio [CodeIgniter](http://www.codeigniter.com/user_guide/toc.html)
+y dediques un tiempo a seguir algunos de los tutoriales obtendrás así una ráapida idea acerca como trabaja el framework, y podrás ponerte en marcha, una vez que hayas realizado el dowloading del código
+construyendo una aplicación introductoria de las que vienen en la guía del usuario CodeIgniter. Apenas comiences a trabajar con CodeIgniter verás a primera vista, la muy comentada
+organización del código de tu aplicación en tres partes: el *modelo*, *las vistas*, y el *controlador*; con esa previa ejercitación por tu parte, podemos ahora continuar.
+
 ## Directos al patrón MVC
 
 En esta clase nos centramos en la M de MVC, vemos que podría ser lo mejor en el
 modelo e intentaremos aprender el poder de este nivel y lo que debería ser; incluso
 podemos inspirarnos en los patrones de Rails, y obtener algunas conclusiones acerca
 de como las cosas pueden ser más eficientes.
-Podemos hacer un rápido análisis de los errores más comunes en el contexto de CodeIgniter,
-para solucionarlos e implementar mejores soluciones.
 
-Dos conceptos que provienen del mundo Rails: (1) modelo grueso, controlador ligero.
-(2) convención sobre configuración.
+Dos conceptos que provienen del mundo Rails:   
 
-Nos dice que nosotros necesitamos escribir las aplicaciones alrededor de la lógica de
-nuestros modelos, y de aquí viene esto de... cualquier código que no puedas justificar
-ponerlo en alguna parte debería estar en el modelo.
+* Modelo grueso, controlador ligero. 
+* Convención sobre configuración.
+
+Nos dicen que necesitamos escribir las aplicaciones alrededor de la lógica de
+nuestros modelos, y de aquí viene esto de... "cualquier código que no puedas justificar
+ponerlo en alguna parte debería estar en el modelo".
 
 El patrón de diseño MVC, nos enseña una serie de reglas para construir aplicaciones
-más robustas y estructuradas.
-Lo más importante de éstas es que el modelo contiene todo el código relacionado al proceso
-de datos.
+más robustas y estructuradas.    
+Lo más importante de éstas es que el modelo contiene todo el código relacionado al proceso de datos.    
 Nuestros modelos controlan los cambios y el estado de los datos.
 
-La M del MVC significa cualquier código que almacena datos en la BD, que valide datos,
+Luego la _M_ de MVC significa cualquier código que almacena datos en la BD, que valide datos,
 que envía emails, que conecta con APIs, que calcula estadísticas, etc.
 
-¿Hay un Modelo estandard?
+La pregunta que surge: ¿Hay un Modelo estandard?
 
-Detrás de cualquier app hay un conjunto de convenciones.
-Los desarrolladores sólo especifican aspectos no convencionales de la app.
+Intentando una contestación, bien podemos decir que detrás de cualquier aplicación hay un conjunto de convenciones.    
+Los desarrolladores sólo especifican aspectos no convencionales de la aplicación.   
 El resultado es que el desarrollador deba tomar menos decisiones.
 
 Como desarrolladores podemos abstraernos de varias funcionalidades, y sabemos que
-conseguiremos una app consistente en distintos ámbitos.
+conseguiremos una aplicación consistente en diferentes entornos.
 
-En estas convenciones se asumen cuestiones bastantes razonables, atendamos a estas:
+En estas convenciones se asumen cuestiones bastantes razonables, atendamos a algunas de ellas:
 
 1. Cada modelo mapea a una tabla de la base de datos. 
 2. El nombre del modelo es singular, el nombre de la tabla plural.
 3. Cada tabla contien una columna id.
 4. Cada tabla contine dos columnas una created_at y otra updated_at.
 
-Atendamos primero una codificación particular donde no usamos framework ni el patrón
-MVC.
+## Sin patrón ni framework
+
+Antes de continuar con el desarrollo de estas convenciones, tratemos de analizar una codificación particular donde no usamos framework alguno y tampoco el patrón
+MVC, para estructurar el código.
 
 {:lang="php"}
     <html>
@@ -75,17 +81,18 @@ MVC.
 
 {:lang="php"}
     <?
-     class Pastes_model Extends CI_Model{
+     class Pastes_model Extends CI_Model {
       public function __construct()
       {
-        $this->load->database();
+       $this->load->database();
       }
-
+       
       function getpastes()
       {
-        $this->db->select('id')->from('pastes')->order_by('id','desc');
-        $query=$this->db->get();
-        return $query->result_array();
+       $this->db->select('id')->from('pastes')
+                              ->order_by('id','desc');
+       $query=$this->db->get();
+       return $query->result_array();
       }
      }
     ?>
@@ -112,12 +119,14 @@ su muy sencillo código.
 
 {:lang="php"}
     <?
-     class Pastes Extends CI_Controller{
-       function index(){
-         $this->load->model('pastes_model');
-         $data['results']=$this->pastes_model->getpastes();
-         $this->load->view('pastes/home',$data);
-       }
+     class Pastes Extends CI_Controller {
+      function index() {
+        $this->load->model('pastes_model');
+        $data['results']=$this
+                         ->pastes_model
+                         ->getpastes();
+        $this->load->view('pastes/home',$data);
+      }
      }
     ?>
 
@@ -136,7 +145,7 @@ Y entonces faltaría ver el código de la vista, lo tenemos en application/views/p
     </head>
     <body>
     <?
-    if(count($results)==0){
+    if(count($results)==0) {
      echo "<p>No hay pastes en la database</p>";
     }
     else {
@@ -158,43 +167,52 @@ Para la mayoría de los casos cada modelo interactúa con una única tabla de la ba
 
 {:lang="php"}
     public function get($where) {
-      return $this->db->where($where)->get('users')->row();
+      return $this->db->where($where)
+                  ->get('users')->row();
     }
     public function get_all($where) {
-      return $this->db->where($where)->get('users')->result();
+      return $this->db->where($where)
+                  ->get('users')->result();
     }
     public function insert($user) {
       return $this->db->insert('users',$user);
     }
+    public function update($where, $user) {
+      return $this->db->where($where)
+                  ->update('users', $user);
+    }
     public function delete($where) {
-      return $this->db->insert($where)->delete('users');
+      return $this->db->where($where)
+                  ->delete('users');
     }
 
-2. ¿Cuál es el nombre del fichero que contiene esta clase?.
+2. ¿Cuál es el nombre del fichero que contiene esta clase?.    
 Bien podría ser models/user.php.
 Llamamos a la clase *User*, está contenida en el fichero user.php y la tabla
 de la BD sobre la cual trabaja tiene el mismo nombre de la clase en plural, *users*
-3. ¿Es todo lo necesario?.
+3. ¿Es todo lo necesario?.    
 No, necesitaremos de código PHP en controladores y en vistas.
 
 Veamos la definición completa de una clase en el modelo:
 
-<?
-class Pastes_model Extends CI_Model{
-  public function __construct()
-  {
+{:lang="php"}
+    <?
+    class Pastes_model Extends CI_Model {
+      public function __construct()
+      {
         $this->load->database();
-  }
+      }
 
-  function get_pastes($num,$start=4) 
-  {
-      $query = $this->db->get('pastes');
-      return $query->result_array();
-  }
-}
-?>
+      function get_pastes($num,$start=4) 
+      {
+        $query = $this->db->get('pastes');
+        return $query->result_array();
+      }
+    }
+    ?>
 
 Con este modelo podemos obtener una respuesta para el usuario como la siguiente: 
+
     Array
     (
         [0] => Array
@@ -204,13 +222,12 @@ Con este modelo podemos obtener una respuesta para el usuario como la siguiente:
                 [language] => Perl
                 [description] => lee de file
                 [body] => #!/usr/bin/perl -w
-    while(<>) {
-     print $_;
-    }
-
+                          while(<>) {
+                           print $_;
+                          }
                 [created_on] => 2007-12-25 13:49:14
             )
- 
+     
         [1] => Array
             (
                 [id] => 2
@@ -218,13 +235,13 @@ Con este modelo podemos obtener una respuesta para el usuario como la siguiente:
                 [language] => Perl
                 [description] => Lee desde un fichero
                 [body] => #/usr/bin/perl -w
-    while(<>){
-    $i++;
-    print $i,":",$_;
-    }
+                          while(<>){
+                            $i++;
+                            print $i,":",$_;
+                          }
                 [created_on] => 2007-12-25 13:55:12
             )
-
+      
         [2] => Array
             (
             ...
@@ -232,26 +249,25 @@ Con este modelo podemos obtener una respuesta para el usuario como la siguiente:
  
 Para esto tenemos un controlador como:    
 
-{yy:lang="php"}
+{:lang="php"}
     <?
     class Pastes Extends CI_Controller{
       function index(){
         $this->load->model('pastes_model');
-        $data['results']=$this->pastes_model->get_pastes();
-	echo "<pre>";
-	print_r($data['results']);
-	echo "</pre>";
+        $data['results']=$this
+                  ->pastes_model->get_pastes();
+        echo "<pre>";
+        print_r($data['results']);
+        echo "</pre>";
       }
     }
     ?>
 
 Como vemos hacemos que desde el controlador se envía la respuesta, evitando código en una vista, lo que anteriormente hicimos en views/pastes/home.html
 
-
 Ahora cambiamos un poco el modelo:
 
-
-{yy:lang="php"}
+{:lang="php"}
     <?
     class Pastes_model Extends CI_Model{
       public function __construct()
@@ -298,54 +314,58 @@ Obtiene:
             )
     )
 
-## Demos un paso más sobre el modelo
+## Damos otro paso sobre el modelo
 
+{:lang="php"}
+    <?
+     class Paste_model extends MY_Model
+     {
+      //protected $_table = 'pastes';
+     }
+    ?>
 
-<?
-class Paste_model extends MY_Model
-{
-    //protected $_table = 'pastes';
-}
-?>
+Y hemos escrito en MY_Model en application/core:
 
-
-mientras que hemos puesto en MY_Model en application/core
+{:lang="php"}
     <?
     class MY_Model extends CI_Model
     {
       public function __construct()
       {
-          parent::__construct();
-          $this->load->database();
-	  $this->load->helper('inflector');
-	  if ( ! isset($this->_table)) {
-             $this->_table = strtolower(plural(str_replace('_model', '', get_class($this))));
-          }
+        parent::__construct();
+        $this->load->database();
+        $this->load->helper('inflector');
+        if ( ! isset($this->_table)) {
+          $this->_table = 
+          strtolower(plural(str_replace('_model',
+                     '', get_class($this))));
+        }
       }
-
       public function get($where)
       {
-        return $this->db->where($where)->get($this->_table)->row();
+        return $this->db->where($where)
+               ->get($this->_table)->row();
       }
       public function get_all($where)
       {
         $pp=array();
-	$pp['language']=$where;
-	$pp['author']='paulinohuerta';
+        $pp['language']=$where;
+        $pp['author']='paulinohuerta';
         return $this->db->where($pp)
                         ->get($this->_table)
                         ->result();
       }
     ?>
 
-Con este controlador
+Y en el código del controlador tendríamos:
 
-{yy:lang="php"}
+{:lang="php"}
     <?
-    class Paste Extends CI_Controller{
-      function index(){
+    class Paste Extends CI_Controller {
+      function index() {
          $this->load->model('paste_model');
-         $data['results']=$this->paste_model->get_all('Ruby');
+         $data['results']=$this
+	        ->paste_model->get_all('Ruby');
 	 $this->load->view('paste/home',$data);
       }
     }
@@ -357,11 +377,9 @@ El controlador invoca get_all enviando 'Ruby' como parámetro, esto es como muest
 También vemos como en el modelo se crea un array asociativo usando como clave
 el nombre de un par de columnas de la tabla, en este caso author y language, es debido a que el parámetro de la función *where* debe ser dado como array.
 
-
 Damos una vuelta de tuerca en MY_Model
 
-/var/www/app15/codeigniter/mvc/appn1/application/core
-{yy:lang="php"}
+{:lang="php"}
     <?
     class MY_Model extends CI_Model
     {
@@ -381,22 +399,25 @@ Damos una vuelta de tuerca en MY_Model
          {
            $this->db->where('id', $args[0]);
          }
-        return $this->db->get($this->_table)->result();
+        return $this->db->get($this->_table)
+                        ->result();
       }
-
+       
       // Resto de funciones CRUD
     }
     ?>
 
 En el controlador preparamos un array para ser aplicado en la cláusula where de la selección.    
 
-{yy:lang="php"}
+{:lang="php"}
     <?
     class Paste Extends CI_Controller{
       function index(){
-        $pp=array('language' => 'Ruby', 'author' => 'paulinohuerta', 'id >' => 9);
+        $pp=array('language' => 'Ruby',
+          'author' => 'paulinohuerta', 'id >' => 9);
         $this->load->model('paste_model');
-        $data['results']=$this->paste_model->get_all($pp);
+        $data['results']=$this->paste_model
+                         ->get_all($pp);
         $this->load->view('paste/home',$data);
       }
     }
@@ -409,16 +430,19 @@ segunda clase.
 Como última cuestión podemos pensar en una insersión, teníamos mas arriba el método.
 
 Con esto
-{yy:lang="php"}
+
+{:lang="php"}
     public function insert($user) {
       return $this->db->insert('users',$user);
     }
 
 También en MY_Model puedo operar de la siguiente manera
-{yy:lang="php"}
+
+{:lang="php"}
     public function insert($data)
     {
-        $success = $this->db->insert($this->_table, $data);
+        $success = $this->db
+            ->insert($this->_table, $data);
         if ($success)
         {
          return $this->db->insert_id();
@@ -432,9 +456,12 @@ También en MY_Model puedo operar de la siguiente manera
 El objetivo principal es devolver el id de la fila insertada, cuando la inserción fue correcta, mientras que si no lo fue
 el método retorna FALSE, y esto nos pone algo más cómodo en el controlador, con lo que podemos tener algo así:
 
-{yy:lang="php"}
-     if($this->paste_model->insert(array('author' => 'juanaguilera', 'description' => 'Grovy desde Perl',
-                                         'language' => 'Perl','body' => 'Es bueno, bueno')))
+{:lang="php"}
+     if($this->paste_model->insert(array(
+           'author' => 'juanaguilera',
+           'description' => 'Grovy desde Perl',
+           'language' => 'Perl',
+	   'body' => 'Es bueno, bueno')))
       {
         $this->load->view('paste/home',$data);
       }

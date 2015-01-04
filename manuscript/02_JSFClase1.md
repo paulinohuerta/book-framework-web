@@ -189,23 +189,3 @@ ahora solicitar a JSF que nos notifique en cada cambio de fase, mediante un
 PhaseListener.   
 
 Utilizamos un PhaseListener en la misma situación que usaríamos un *filtro*, javax.servlet.Filter, nuestro objetivo es ser avisados antes y después de cada fase, con esto estaremos obteniendo un acceso granular a un punto concreto del ciclo de vida de una petición.
-
----
-That class already exist in Java SE API: java.net.URL.
-
-InputStream input = new URL("http://localhost/context/page.jsf").openStream();
---> esta es el HTML generado por JSF
-
-
-Aqui está el ejemplo Listener en ciclo vida 'example':
-
-http://www.itcuties.com/j2ee/jsf-phaselistener/
-
-Y este es otro ejemplo:
-
-http://www.devmanuals.com/tutorials/java/jsf/jsf2TagLibrary/core/phaseListener.html
-
-
---
-
---
