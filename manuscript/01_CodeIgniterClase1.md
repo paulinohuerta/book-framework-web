@@ -61,12 +61,13 @@ MVC, para estructurar el código.
         $username="user1";
         $password="xxxxx";
         $database="rebbin";
-        $con=mysql_connect($serverip,$username,$password) or die("no puedo conectar con mysql server");
-        @mysql_select_db($database) or die("no puedo seleccionar DB");
+        $con=mysql_connect($serverip,$username,$password)
+	  or die("no puedo conectar con mysql server");
+        @mysql_select_db($database) or die("no selección de DB");
         $sql="select id from pastes order by created_on desc";
-        $result=mysql_query($sql) or die("No puedo grab pastes");
-        if(!mysql_num_rows($result)){
-         echo "<p>No hay pastes en la BD</p>";
+        $result=mysql_query($sql) or die("Problema con pastes");
+        if(!mysql_num_rows($result)) {
+          echo "<p>No hay pastes en la BD</p>";
         }
         else {
           while($row=mysql_fetch_array($result)){
@@ -77,7 +78,7 @@ MVC, para estructurar el código.
      </body>
     </html>
 
-## ¿Cómo sería esto empleando CI?
+## Aproximación usando CI
 
 {:lang="php"}
     <?
@@ -134,9 +135,11 @@ Observamos como el resultado de la función del modelo invocada en el
 controlador es asignado a una key *results* del array asociativo $data;
 array éste al que podrá acceder la vista una vez sea cargada por el controlador.
 
-Podemos decir que el controlador de nuestra applicación es una clase derivada deuna del framework CI_Controller y tiene como objeto cargar el los modelos y las vistas de la aplicación.
+Podemos decir que el controlador de nuestra applicación es una clase derivada
+de una clase del framework llamada CI_Controller y tiene como objeto cargar el
+los modelos y las vistas de la aplicación.
 
-Y entonces faltaría ver el código de la vista, lo tenemos en application/views/pastes/home.php
+Faltaría ver el código de la vista, lo tenemos en application/views/pastes/home.php:
 
 {:lang="php"}
     <html>
@@ -159,11 +162,15 @@ Y entonces faltaría ver el código de la vista, lo tenemos en application/views/p
     </body>
     </html>
 
-Ahora podemos volver sobre los tres puntos enumerados más arriba, comenzando por el primero:
+Ahora podemos retomar los tres puntos enumerados más arriba, y tratamos de ejemplificar nuevamente, comencemos por el primero de los puntos:
 
-1. ¿Sobre que BD está trabajando nuestro código?.
+    ¿Sobre que BD está trabajando nuestro código?
 
-Para la mayoría de los casos cada modelo interactúa con una única tabla de la base de datos; y tenemos algunas acciones que podríamos llamar *acciones estándares* de interacción con esa tabla, son conocidos como métodos CRUD (Create, Read, Update y Destroy). Entonces podríamos especificar la tabla de la base de datos a través de la clase.
+Para la mayoría de los casos cada modelo interactúa con una única tabla de la base de datos; y tenemos algunas acciones que podríamos llamar
+*acciones estándares* de interacción con esa tabla, son conocidos como métodos
+CRUD (Create, Read, Update y Destroy).    
+Entonces podríamos especificar la tabla de la base de datos a través de la
+clase, tomemos a la tabla *users*, los métodos del modelo podrían estar codificados así:
 
 {:lang="php"}
     public function get($where) {
@@ -186,14 +193,16 @@ Para la mayoría de los casos cada modelo interactúa con una única tabla de la ba
                   ->delete('users');
     }
 
-2. ¿Cuál es el nombre del fichero que contiene esta clase?.    
+    ¿Cuál es el nombre del fichero que contiene esta clase?
+
 Bien podría ser models/user.php.
-Llamamos a la clase *User*, está contenida en el fichero user.php y la tabla
-de la BD sobre la cual trabaja tiene el mismo nombre de la clase en plural, *users*
-3. ¿Es todo lo necesario?.    
+Podemos llamar a la clase *User*, en realidad no estamos obligados a agregar *_model* al nombre al nombre. Mientras que la tabla de la BD sobre la cual trabaja tiene el mismo nombre de la clase en plural, *users*
+
+    ¿Es todo lo necesario?.    
+
 No, necesitaremos de código PHP en controladores y en vistas.
 
-Veamos la definición completa de una clase en el modelo:
+Veamos la siguiente definición lo que paara CI es un modelo:
 
 {:lang="php"}
     <?
@@ -202,8 +211,7 @@ Veamos la definición completa de una clase en el modelo:
       {
         $this->load->database();
       }
-
-      function get_pastes($num,$start=4) 
+      public function get_pastes() 
       {
         $query = $this->db->get('pastes');
         return $query->result_array();
@@ -211,7 +219,9 @@ Veamos la definición completa de una clase en el modelo:
     }
     ?>
 
-Con este modelo podemos obtener una respuesta para el usuario como la siguiente: 
+Con este modelo y una vez realizada la petición a la URL:
+http://example.com/index.php/pastes
+obtenemos una respuesta como la que se muestra abajo. ¿Cuáles son las piezas de código que han intervenido?
 
     Array
     (
@@ -247,7 +257,7 @@ Con este modelo podemos obtener una respuesta para el usuario como la siguiente:
             ...
             ...
  
-Para esto tenemos un controlador como:    
+Deberíamos tener un *controlador* como el siguiente,    
 
 {:lang="php"}
     <?
@@ -263,30 +273,32 @@ Para esto tenemos un controlador como:
     }
     ?>
 
-Como vemos hacemos que desde el controlador se envía la respuesta, evitando código en una vista, lo que anteriormente hicimos en views/pastes/home.html
+Como vemos hacemos que desde el controlador se envíe la respuesta, evitando código en una vista, lo que en el primer ejemplo fue el uso de views/pastes/home.html
 
-Ahora cambiamos un poco el modelo:
+Proseguimos cambiando mínimamente el modelo, la finalidad es demostrar que la
+lógica de negocio está situada en el modelo, aunque en este caso nuestra propuesta es 
+una selección más restringida de los datos existentes en la BD, debemos dirigirnos al modelo para acometerla.
 
 {:lang="php"}
     <?
-    class Pastes_model Extends CI_Model{
+    class Pastes_model Extends CI_Model {
       public function __construct()
       {
-         $this->load->database();
+        $this->load->database();
       }
-
-      function get_pastes($num=4,$start=0) 
+      public function get_pastes($num=4, $start=0) 
       {
-         $this->db->select('description,language')->from('pastes')->where('language','Ruby')
-                                    ->order_by('created_on','desc')->limit($num,$start);
-         $query=$this->db->get();
-         return $query->result_array();
+        $this->db->select('description,language')
+           ->from('pastes')->where('language','Ruby')
+           ->order_by('created_on','desc')->limit($num,$start);
+        $query=$this->db->get();
+        return $query->result_array();
       }
     }
     ?>
 
+La respuesta obtenida es:
 
-Obtiene:
     Array
     (
         [0] => Array
@@ -294,19 +306,19 @@ Obtiene:
                 [description] => Esto funciona
                 [language] => Ruby
             )
-
+    
          [1] => Array
             (
                 [description] => Esto funciona
                 [language] => Ruby
             )
-
+       
          [2] => Array
             (
-                [description] => Equivale al acostumbrado modo . . .
+                [description] => Equivale al acostumbrado modo ... 
                 [language] => Ruby
             )
-
+      
          [3] => Array
             (
                 [description] => Seguro convence
@@ -314,7 +326,10 @@ Obtiene:
             )
     )
 
-## Damos otro paso sobre el modelo
+## Un paso más, codificamos MY_Model
+
+Nuestro siguiente trabajo será intentar *generalizar* las clases del modelo, de
+tal manera que el desarrollador sólo deba pensar en definir una clase sencillamente así:
 
 {:lang="php"}
     <?
@@ -324,7 +339,7 @@ Obtiene:
      }
     ?>
 
-Y hemos escrito en MY_Model en application/core:
+Para esta propuesta, escribiremos MY_Model en application/core:
 
 {:lang="php"}
     <?
@@ -371,13 +386,20 @@ Y en el código del controlador tendríamos:
     }
     ?>
 
-Observamos que el nombre de la clase es en singular siendo así tanto en el modelo como en el controlador, y ya sabemos que el modelo trabaja sobre la tabla *pastes* de la BD.
-Hemos agregado en el modelo la función *get* aunque en nuestro ejemplo no la usamos, estaría destinada a conseguir una única fila de la tabla, es decir, la usaremos cuando esperamos una sola fila como resultado de la consulta.
-El controlador invoca get_all enviando 'Ruby' como parámetro, esto es como muestra, lo oportuno es que sea un requerimiento dado por el usuario por ejemplo.
+Observamos que el nombre de la clase es en singular siendo así tanto en
+el modelo como en el controlador, y ya sabemos que el modelo trabaja sobre la
+tabla en plural, en este caso la *tabla pastes* de la BD.   
+Hemos agregado en el modelo la función *get* aunque en nuestro ejemplo no la
+usamos, estaría destinada a conseguir una única fila de la tabla, es decir, 
+la usaremos cuando esperamos una sola fila como resultado de la consulta.   
+El controlador *invoca get_all* enviando _Ruby_' como parámetro, esto es sólo
+a los fines de demostración, lo oportuno sería que ese parámetro se corresponda
+con algunos de los datos proporcionados por el usuario en la petición o bien
+que ha sido generado en otro momento en el flujo del procesamiento.    
 También vemos como en el modelo se crea un array asociativo usando como clave
-el nombre de un par de columnas de la tabla, en este caso author y language, es debido a que el parámetro de la función *where* debe ser dado como array.
+el nombre de un par de columnas de la tabla, en este caso *author* y *language*, es debido a que el parámetro de la _función where_ debe ser dado como array.
 
-Damos una vuelta de tuerca en MY_Model
+    Damos otra vuelta de tuerca en MY_Model
 
 {:lang="php"}
     <?
@@ -402,7 +424,6 @@ Damos una vuelta de tuerca en MY_Model
         return $this->db->get($this->_table)
                         ->result();
       }
-       
       // Resto de funciones CRUD
     }
     ?>
@@ -423,20 +444,27 @@ En el controlador preparamos un array para ser aplicado en la cláusula where de 
     }
     ?>
 
-Por último hay que notar que hasta ahora no hemos visto en ninguna parte del código, hacer referencia a la BD
-sobre la cual trabaja la app. con esto y otros simples detalles de configuración de la app comenzamos nuestra
+Y voilá, hemos conseguido tener un modelo muy sencillo, por otra parte hemos 
+de alguna manera, descifrado el sentido común del patrón MVC, como las ventajas del
+tan conocido principio DRY (Don't Repeat Yourself).
+Y acerca del patrón MVC tenemos las idea más clara, como para saber *donde* acudir para modificar o conseguir una nueva funcionalidad de la aplicación
+
+Por último hay que notar que hasta ahora no hemos visto en ninguna parte del código, hacer referencia a la BD 
+sobre la cual trabaja la aplicación, con esto y otros simples detalles de configuración que afecta a las aplicaciones usando CodeIgniter comenzaremos nuestra
 segunda clase.
 
-Como última cuestión podemos pensar en una insersión, teníamos mas arriba el método.
-
-Con esto
+Como última cuestión podemos probar de hacer inserciones en la BD, para ello retomemos el método *insert* mostrado anteriormente:
 
 {:lang="php"}
     public function insert($user) {
       return $this->db->insert('users',$user);
     }
 
-También en MY_Model puedo operar de la siguiente manera
+Podríamos usar nuevamente MY_Model, esta vez con el objetivo que el método insert devuelva el *id* de la fila insertada, toda vez que la acción se llevó
+acabo con éxito, mientras que si por alguna razón la inserción no se realiza
+sea devuelto FALSE.    
+Esto nos aportaría algo más de comodidad en el controlador, con lo que
+podemos tener algo así en el modelo:
 
 {:lang="php"}
     public function insert($data)
@@ -453,8 +481,7 @@ También en MY_Model puedo operar de la siguiente manera
         }
     }
 
-El objetivo principal es devolver el id de la fila insertada, cuando la inserción fue correcta, mientras que si no lo fue
-el método retorna FALSE, y esto nos pone algo más cómodo en el controlador, con lo que podemos tener algo así:
+Aprovechando esta funcionalidad agregada al modelo en el *controlador* podríamos tener:
 
 {:lang="php"}
      if($this->paste_model->insert(array(
@@ -469,3 +496,7 @@ el método retorna FALSE, y esto nos pone algo más cómodo en el controlador, con 
         echo "Imposible<br>";
       }
 
+Se espera que los datos que se graben en la tabla de la BD, sean generados por el
+mismo proceso que se inicia con la recepción de la petición cliente, y no como
+se muestra aquí, tal como ya se comentó, esto sólo tiene como fin mostrar la
+incidencia del código del *controlador* en el resto de la lógica de negocio.

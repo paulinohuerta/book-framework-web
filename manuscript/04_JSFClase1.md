@@ -63,21 +63,21 @@ Si este método retorna "foo" ó "bar" y no hay un explícito mapeo en faces-config
 la página resultante es foo.xhtml ó bar.xhtml, desde la misma carpeta que está contenido el
 formulario.
 
-    Por ejemplo:
+    Por ejemplo, si en una página inicial tenemos un botón así:
 
-    Si en una página inicial tenemos un botón así
 {:lang="xhtml"}
     <h:commandButton action="#{navigator.choosePage}"/>
 
-Y un bean
+Y un bean como el siguiente
+
 {:lang="java"}
     @ManagedBean 
     Class  Navigator {...}
-El método choosePage retorna tres posibles strings "page1", "page2", ó "page3"
+
+El método _choosePage_ retorna tres posibles strings *page1*, *page2*, ó *page3*.   
 Los nombres cotejados por el retorno del método choosePage serán page1.xhtml, page2.xhtml, y page3.xhtml
 
      Veamos la clase Navigator
-
 {:lang="java"}
     @ManagedBean                                                          
     public class Navigator {

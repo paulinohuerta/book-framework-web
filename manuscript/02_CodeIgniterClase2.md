@@ -38,4 +38,55 @@ debería ser re-enrutado.
 (:num) coteja un segmento conteniendo sólo números.   
 (:any) coteja un segmento conteniendo cualquier caracter.
 
+## Trabajando sobre el controlador
+
+Cuando analizamos el nivel o capa del *controlador* salta a la vista que es aquí
+donde se enlazan las vistas y los modelos de nuestra aplicación.    
+Nos vamos a esforzar en encontrar convenciones para producir un autoload de nuestras vistas y modelos intentando obtener un mecanismo aún más convencional.
+Así también podemos ver la posibilidad de usar filtros con la idea de ejecutar
+código pre- y post- acción.
+
+    Autoloading de vistas
+
+Reflexionemos sobre esta posible convención:
+
+Las vistas deberían ser puestas en una carpeta que sea llamada con el nombre del controlador y luego debería agregarse el nombre de la acción.    
+
+Es decir, si usamos la URI /users/list tiene sentido cargar la vista en views/users/list.php. De hecho, puedes ya estar familiarizado con este modelo.
+
+Con esta convención en mente podemos reducir la necesidad de llamar a $this->load->view() y hacer que esta se cargue automáticamente después que ejecuta el controlador. Esto nos llevará a tener un controlador más sucinto y claro.
+
+Vamos a necesitar una característica de CodeIgniter, se trata de la función *_remap()*; es un método que de existir en un controlador, será llamado por CodeIgniter en lugar de la acción del controlador. Con este mecanismo, el desarrollador puede ejecutar funcionalidades antes y después del proceso de cada *acción*.    
+
 {:lang="php"}
+    <?
+    class MY_Controller extends CI_Controller {
+      public function __construct()
+      {
+        parent:__construc();
+      }
+    }
+    ?>
+
+Definimos nuestra función _remap(), recibe dos parámetros, $method que es el nombre de la acción,
+y $parameters que son los parámetros obtenidos de los distintos segmentos de la ruta URL los que son pasados al controlador de la acción.
+
+{:lang="php"}
+    <?
+    public function _remap($method, $parameters) {
+      call_user_func_array(array($this,
+                  $method), $parameters);
+    }
+    ?>
+
+    Autoloading de modelos
+
+Podemos emplear una técnica bastante simple para seguir limpiando y poniendo más claro el código del controlador, consistiría en proveer un pequeña interfaz model-autoloading.
+
+La idea es cargar modelo basado en convenciones, algunas de estas ya hemos usado.   
+Recordemos: *singular_recurso_model.php* lo que sería para una tabla *users* user_model.php; mientras que para un modelo que manipula un ficheros debería ser file_model.php.
+
+Además sabemos que accedemos a nuestro modelo así:   
+$this->user->get_all();    
+$this->file->upload();    
+
