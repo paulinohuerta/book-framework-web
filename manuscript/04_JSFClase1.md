@@ -13,9 +13,7 @@ Recuerda que la URL no coteja el real filename, usarás blala.xhtml
 
 {:lang="xhtml"}
     <?xml version="1.0" encoding="UTF-8"?>
-    
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-    
     <html xmlns="http://www.w3.org/1999/xhtml"
        xmlns:h="http://java.sun.com/jsf/html"
        xmlns:f="http://java.sun.com/jsf/core">
@@ -55,8 +53,9 @@ Si escogemos anotación, podríamos tener:
 {:lang="java"}
     @ManagedBean 
     public class SomeName { ... }
+
 Con esto nos referimos a un bean con *#{someName.blah}*, donde el nombre del bean es el nombre de la clase con la primer letra cambiada a minúscula.
-Request es el ámbito por defecto, y "blahh" es un nombre de método o una propiedad la que enlaza con un método getter o setter; esto último ocurre en h:inputText, mientras que el la action de h:commandButton es un exacto nombre de método.
+Request es el ámbito por defecto, y "blah" es un nombre de método o una propiedad la que enlaza con un método getter o setter; esto último ocurre en h:inputText, mientras que el la action de h:commandButton es un exacto nombre de método.
 
 Acerca del valor de retorno del action controller method:
 Si este método retorna "foo" ó "bar" y no hay un explícito mapeo en faces-config.xml, entonces
@@ -88,7 +87,7 @@ Los nombres cotejados por el retorno del método choosePage serán page1.xhtml, pa
       // getter y setter
     }
 
-Esta es una declaración de un managed bean, sin requerir una entrada en faces-config.xml, se usa annotación.
+Esta es una declaración de un *managed bean*, sin requerir una entrada en faces-config.xml, se usa annotación.
 Debido a que no se da un nombre será usado el nombre de la clase con la primer letra en minúsicucla.
 También podría usarse un nombre así:   
 {:lang="java"}
@@ -99,24 +98,29 @@ El ámbito no se ha dado entoncespor defecto es *request*. Podríamos usar una ano
 Puesto que no hay explícitas reglas de navegación en el fichero faces-config.xml,
 los valores de retorno corresponden a page1.xhtml, page2.xhtml, y page3.xhtml.
 
-## Ciclo de vida
+## Fases del framework
+
+Antes de pasar al detalle de las faces del *ciclo de vida* interesa tener presente como vas a intervenir.   
+Como primera cuestión habrás instalado una *implementación* de la especificación de referencia
+de JSF, conocida como JSF RI. Mojarra es el nombre de la actual JSF RI, y es la implementación
+de que viene con servidores como Glassfish entre otros.
 
 Cuando alguien comienza a estudiar y comprender como trabaja JSF, ya viene con alguna práctica realizada
-con la API servlet y el uso de técnicas que pretenden eliminar código Java de las vistas, es decir, normalmente
-se conoce los scriptlets; es decir sabe que existen estándares Java destinados ha organizar mejor el código y
-hacer más productivo el desarrollo de aplicaciones, nos referimos a los estándares Expression Language y la
-librería JSTL. Ahora, que comenzamos a estudiar JSF es buen momento para preguntarnos:   
-*¿Los servlets no tienen damasiadas responsibilidades?*   
-Visto que obtiene los datos de las peticiones HTTP, los convierte si es necesario, los valida, los pone a
-disposición de las páginas JSP agregando nuevos atributos al objeto request y despachándolo (forward).
+con la API servlet y el uso de técnicas que pretenden eliminar código Java de las vistas, es decir, que quien comienza con JSF, normalmente conoce lo que es un scriptlet; la cuestión aquí es hacer incapié en el hecho
+de la existencia de estándares Java destinados ha organizar mejor el código y hacer más productivo el desarrollo de aplicaciones, nos referimos a estándares como Expression Language y la librería JSTL.    
+Al comenzar el estudio del framwork JSF es preciso hacernos esta pregunta:    
+*¿Los servlets no tienen damasiadas responsibilidades?*
+en su respuesta estaría la justificación del por qué estudiamos JSF.
 
-Partimos del hecho que un framework como JSF, nos ofrece un  conjunto de componentes específicos para alcanzar las tareas de la aplicación, trabaja en un flujo bien concreto, lo que se conoce
+Tomemos la pregunta anterior como excusa para repasar algunas de las acciones y tareas de las que se ocupa un servlet; es quien obtiene los datos de las peticiones HTTP, los convierte si es necesario, los valida, los pone a disposición de las páginas JSP despachándolo (forward), agregando previamente para esto último, nuevos atributos al objeto request.
+
+Partimos del hecho que un framework como JSF, nos ofrece un  conjunto de componentes específicos para alcanzar las tareas de la aplicación, trabaja en un flujo bien concreto, y es este flujo el que se conoce
 como ciclo de vida.
 
 JSF es un framework basado en componentes y no en acciones como CodeIgniter; en el momento que JSF surgió rompió con
-la costumbre de la época, éste tenía una forma muy diferente, el "status quo" del momento estaba basado en acciones.   
+la costumbre de la época. JSF tenía una forma muy diferente, el "status quo" del momento, estaba basado en acciones.   
 
-Si continuamos analizando el código xhtml, podemos resaltar:
+## El controlador como enlace entre usuario y aplicación
 
 Hasta aquí, podemos ver que además de la no existencia de código Java entremezclado, el *modelo* podría estar participando, de forma
 similar a lo que hemos visto en páginas JSP usando el EL, expression language, concretamente "#{order.color}" en el formulario
@@ -145,30 +149,9 @@ conozca las *seis faces del ciclo de vida de JSF*
 
 [JSF ciclco de vida](https://balusc.blogspot.com.es/2006/09/debug-jsf-lifecycle.html)
 
-Antes de pasar al detalle de las faces del ciclo interesa tener presente como vas a intervenir.   
-Cómo primera cuestión habrás instalado una *implementación* de la especificación de referencia
-fde JSF, conocida como JSF RI. Mojarra es el nombre de la actual JSF RI, y es la implementación
-de que viene con servidores como Glassfish entre otros.
-
-Cuando alguien comienza a estudiar y comprender como trabaja JSF, ya viene con alguna práctica realizada
-con la API servlet y el uso de técnicas que pretenden eliminar código Java de las vistas, es decir, normalmente
-se conoce los scriptlets; es decir sabe que existen estándares Java destinados ha organizar mejor el código y
-hacer más productivo el desarrollo de aplicaciones, nos referimos a los estándares Expression Language y la
-librería JSTL. Ahora, que comenzamos a estudiar JSF es buen momento para preguntarnos:
-*¿Los servlets no tienen damasiadas responsibilidades?*
-Visto que obtiene los datos de las peticiones HTTP, los convierte si es necesario, los valida, los pone a
-disposición de las páginas JSP agregando nuevos atributos al objeto request y despachándolo (forward).
-
-Partimos del hecho que un framework como JSF, un conjunto de componentes específicos para alcanzar las tareas
-de la aplicación y un ciclo de vida o flujo bien concreto.
-
-JSF no es un framework basado en componentes y no en acciones como CodeIgniter; en el momento que JSF surgió rompió con
-la costumbre de la época, tenía una forma muy diferente, el "status quo" del momento estaba basado en acciones.
-En principios, si analizamos el código xhtml, podemos resaltar:
-
 ## Un framework statefull
 
-cuando desarrollamos con un framework basado en acción tenemos 'tags' que nos ayudan en el desarrollo de la vista, y podemos pensar que está ligado, lo que si
+Cuando desarrollamos con un framework basado en acción tenemos 'tags' que nos ayudan en el desarrollo de la vista, y podemos pensar que está ligado, lo que si
 quieres quitar las tags y hacerlo a mano lo consigues.
 cuando submit un formulario basado en acción, nuestra app basada en la aciión no se fija en el estado de la vista.
 no es tenido en cuenta como ella fue escrita, tampoco si es un html estático o un jsp. Se montará una petición que tiene como parámetro est e y este otro dato, que los aportó el usuario en el formulario.
@@ -180,12 +163,108 @@ con lo que el arbol de componentes representa la estructura de la página y que J
 JSF, guarda en memoria el árbol que fue usado para generar ese formulario.
 Esto no ocure en un servlet, que genera automáticamente un HTML a partir de un JSP, esto lo hace el servidor para enviar datos al cliente, es para esto que que tiene en cuenta el formulario, para enviarlo, lo mismo es en los frameworks
 basado en acción, mientras que JSF, al guardar en memoria la estructura de la página, en ese árbol de componentes, él va a comparar cada atributo de la petición con los campos que estaban disponibles para el usaurio.
-Teniendo toda esta información JSF, podrá validar los datos enviados por el usuario. Se puede decir que JSF sabe  todo acerca de un formulario, que había que hay ahora que el usuario envió datos, JSF conoce el estado de la vista y lo mantine a través de las peticiones , por ello pdoemos considerarlo un framework 'statefull'.
+Teniendo toda esta información JSF, podrá validar los datos enviados por el usuario. Se puede decir que JSF sabe  todo acerca de un formulario, que había que hay ahora que el usuario envió datos, JSF conoce el estado de la vista y lo mantine a través de las peticiones , por ello podemos considerarlo un framework 'statefull'.
 
-Con esto en este mento podríamos ver todo el flujo de mensajes y como van entrando los actores en la escena, proponemos el código de baslsuc.
+Una buena práctica para entender el ciclo de vida de JSF es codificar una aplicación tal como lo [demuestra
+Balusc](https://balusc.blogspot.com.es/2006/09/debug-jsf-lifecycle.html) (nombre de un usuario con merecido respeto en stackoverflow), es una codificación destinada exclusivamente para que un desarrollador JSF, tenga una herramienta concreta para recorrer y estudiar el flujo completo con la entrada y salida de cada una de las etapas. La aplicación de Balusc pretende que seamos avisados antes y después de cada fase, ofreciendo sus reflexiones y las posibles buenas prácticas que se derivan de esta *aplicación explicativa*
 
-Vistas las responsabilidades de cada una de las seis fases de JSF, podríamos
-ahora solicitar a JSF que nos notifique en cada cambio de fase, mediante un
-PhaseListener.   
+En la siguiente clase vamos a proponernos *jugar*, aunque sea mínimamente con el ciclo de vida, con el fin de
+ver más de cerca la responsabilidad de alguna de las fases, utilizaremos un _PhaseListener_, y principalmente demostraremos que estamos en condiciones de obtener un *acceso granular a un punto concreto* del ciclo de vida de una petición.
 
-Utilizamos un PhaseListener en la misma situación que usaríamos un *filtro*, javax.servlet.Filter, nuestro objetivo es ser avisados antes y después de cada fase, con esto estaremos obteniendo un acceso granular a un punto concreto del ciclo de vida de una petición.
+{:lang="java"}
+    package mypackage;
+    import javax.faces.bean.ManagedBean;
+    import javax.faces.bean.SessionScoped;
+    import javax.faces.bean.ApplicationScoped;
+    
+    @ManagedBean
+    @ApplicationScoped
+    public class Customer {
+      private String firstName;
+      private String lastName;
+      public String getFirstName() {
+        return firstName;
+      }
+      public void setFirstName(String firstName) {
+        this.firstName = firstName;
+      }
+       // resto de getter y setter
+      public String save() {
+        return "/showCustomer.xhtml";
+      }
+    }
+Mostramos parcialmente el contenido de web.xml
+{:lang="xml"}
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!-- se omiten las definiciones -->
+    <!-- Faces Servlet -->
+    <servlet>
+      <servlet-name>Faces Servlet</servlet-name>
+      <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+      <load-on-startup>1</load-on-startup>
+    </servlet>
+    <!-- Faces Servlet Mapping -->
+    <servlet-mapping>
+      <servlet-name>Faces Servlet</servlet-name>
+      <url-pattern>*.jsf</url-pattern>
+    </servlet-mapping>
+    <!-- Welcome files -->
+    <welcome-file-list>
+      <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+    <context-param>
+      <param-name>javax.faces.PROJECT_STAGE</param-name>
+      <param-value>Development</param-value>
+    </context-param>
+
+El fichero _index.html_
+{:lang="html"}
+    <html>
+      <head>
+       <meta http-equiv="refresh" content="0; URL=editCustomer.jsf">
+      </head>
+    </html>
+
+Mostramos el *body* de cancel.xhtml
+{:lang="xhtml"}
+    <?xml version="1.0" encoding="UTF-8"?>
+    <body>
+      <h1><h:outputText value="MyGourmet"/></h1>
+      <h:outputText value="Cancelled customer editing!"/>
+    </body>
+
+Parcialmenteel fichero editar.xhtml
+{:lang="xhtml"}
+    <body>
+      <h1><h:outputText value="MyGourmet"/></h1>
+      <h2><h:outputText value="Edit Customer"/></h2>
+      <h:messages showDetail="true" showSummary="false"/>
+      <h:form id="form">
+        <h:panelGrid id="grid" columns="2">
+          <h:outputLabel value="First Name:" for="firstName"/>
+          <h:inputText id="firstName" value="#{customer.firstName}"
+                   required="true"/>
+          <h:outputLabel value="Last Name:" for="lastName"/>
+          <h:inputText id="lastName" value="#{customer.lastName}"
+                   required="true"/>
+        </h:panelGrid>
+        <h:commandButton id="save" action="#{customer.save}" value="Save"/>
+        <h:commandButton id="cancel" action="/cancelled.xhtml" value="Cancel"
+                immediate="true"/>
+      </h:form>
+    </body>
+
+Parcialmente show.xhtml
+{:lang="xhtml"}
+    <body>
+      <h1><h:outputText value="MyGourmet"/></h1>
+      <h2><h:outputText value="Show Customer"/></h2>
+      <h:panelGrid id="grid" columns="2">
+        <h:outputText value="First Name:"/>
+        <h:outputText value="#{customer.firstName}"/>
+        <h:outputText value="Last Name:"/>
+        <h:outputText value="#{customer.lastName}"/>
+      </h:panelGrid>
+      <h:outputText value="Customer saved successfully!" />
+    </body>
+

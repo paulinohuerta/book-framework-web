@@ -46,7 +46,7 @@ Nos vamos a esforzar en encontrar convenciones para producir un autoload de nues
 Así también podemos ver la posibilidad de usar filtros con la idea de ejecutar
 código pre- y post- acción.
 
-    Autoloading de vistas
+1. Autoloading de vistas
 
 Reflexionemos sobre esta posible convención:
 
@@ -79,9 +79,60 @@ y $parameters que son los parámetros obtenidos de los distintos segmentos de la 
     }
     ?>
 
-    Autoloading de modelos
+Deberíamos verificar que el método *exista*, es necesario asegurarlo, si esto no
+ocurre, sería preciso responder con código 404.
 
-Podemos emplear una técnica bastante simple para seguir limpiando y poniendo más claro el código del controlador, consistiría en proveer un pequeña interfaz model-autoloading.
+{:lang="php"}
+    if(method_exists($this,$method)
+    {
+      call_user_func_array(array($this, $method),
+                                    $parameters);
+    }
+    else
+    {
+      show_404();
+    }
+
+Una vez llamado con éxito el método, buscaremos de construir el *nombre de la
+vista* con el controlador y la acción.
+
+{:lang="php"}
+    $view = strtolower(get_class($this)) . '/' . $method;
+
+También debemos pensar como pasamos los datos, podemos definir una variable al
+nivel de instancia $this->data
+
+{:lang="php"}
+    public $data = array();
+
+Y entonces podemos cargar la vista con:
+
+{:lang="php"}
+    $this->load->view($view, $this->data);
+
+Ahora sí tenemos podemos tener un controlador como sigue:
+
+{:lang="php"}
+<?php
+    class Pastes extends MY_Controller {
+      public function __construct()
+      {
+        parent::__construct();
+        $this->load->model('pastes_model');
+      }
+      public function index()
+      {
+        $this->data['pastes'] = $this->pastes_model->get_pastes();
+        $this->data['title'] = 'Pastes archive';
+      }
+     }
+
+No está mal, pues nos proponíamos *claridad*, y aún podemos ampliar la técnica para conseguir cargar el modelo 
+también en el controlador.
+
+2. Autoloading de modelos
+
+Podemos emplear una técnica bastante simple para seguir limpiando el código del controlador, consistiría en proveer un pequeña interfaz model-autoloading.
 
 La idea es cargar modelo basado en convenciones, algunas de estas ya hemos usado.   
 Recordemos: *singular_recurso_model.php* lo que sería para una tabla *users* user_model.php; mientras que para un modelo que manipula un ficheros debería ser file_model.php.
@@ -89,4 +140,173 @@ Recordemos: *singular_recurso_model.php* lo que sería para una tabla *users* use
 Además sabemos que accedemos a nuestro modelo así:   
 $this->user->get_all();    
 $this->file->upload();    
+
+Podriamos cargar automáticamente el modelo *asumiendo* que a nuestro controlador le corresponde un nombre de modelo en singular.    
+En nuestro MY_Controller.php procedemos como sigue:    
+
+{:lang="php"}
+    public function __construct()
+    {
+      $this->load->helper('inflector');
+      $model=strtolower(singular(get_class($this)));
+       // Verificamos que el modelo exista, en este caso lo cargamos.
+      if(file_exists(APPATH . 'models/' . $model . '_model.php'))
+      {
+         $this->load->model($model . '_model',$model);
+      }
+    }
+
+Esto es lo que buscamos pero no resuelve nuestro problema ya que si necesitaramos trabajar también sobre otro modelo,¿cómo lo cargaríamos?.      
+Habría una solución *agregando un array* al controlador, y que de forma automática agregara
+*_model* y cargara *cada uno de los modelos puestos en el array*; llamemos $models al array:
+
+{:lang="php"}
+    public $models = array();
+
+Y agregando un bucle:
+
+{:lang="php"}
+    foreach($this->models as $model) { 
+      $this->load->model($model . '_model', $model);
+    }
+
+Es así como en nuestro controlador podemos especificar los modelos que necesitamos cargar, para ello usaremos:
+
+{:lang="php"}
+    public $models = array('user', 'project', 'benchmark');
+
+Si comparamos esto a nuestro previo código, vemos que utilizamos el constuctor para estas acciones de carga:
+
+{:lang="php"}
+    $this->load->model('user_model','user');
+    $this->load->model('project_model','project');
+    $this->load->model('benchmark_model','benchmark');
+
+Si bien es una sutil diferencia, trabajando en grandes aplicaciones, con extensos bloques de código y numerosos
+ficheros, pequeños cambios como estos pueden hacer la diferencia.    
+Pero lo que nos debe quedar en limpio que un código más conciso y sucinto es *más mantenible*.
+
+Una vez nuestra andadura por MY_Model y MY_Controller podemos proponernos lo siguiente:
+Trabajamos sobre la *tabla pastes*
+su estructura es la siguiente.
+
+    CREATE TABLE pastes (
+       id int(10) unsigned NOT NULL auto_increment,
+       author varchar(20) NOT NULL,
+       language varchar(20) NOT NULL,
+       description varchar(50) default NULL,
+       body text NOT NULL,
+       created_on timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+       PRIMARY KEY  (id)
+    ) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8;
+
+1. usemos singular
+2. mostremos get_all
+3. mostremos view
+4. al final demos posiblidad de insertar un nuevo registro.
+
+_Modelo_: models/paste_model.php
+{:lang="php"}
+    <?
+    class Paste_model extends MY_Model
+    {
+    }
+    ?>
+
+_Controlador_: controllers/paste.php
+{:lang="php"}
+    <?
+    class Paste extends MY_Controller {
+       protected $models = array( 'paste');
+       protected $helpers = array( 'cookie', 'file' );
+       public function index() {
+            // arrastramos del ejemplo anterior el array $pp,
+            // sabiendo que no tiene sentido en un índice como tal
+         $pp=array('language' => 'Ruby',
+             'author' => 'paulinohuerta', 'id >' => 9);
+         $this->data['pastes'] = $this->paste->get_all($pp);
+         $this->data['title'] = 'Pastes archive';
+       }
+       public function view($id) {
+         $this->data['pastes_item'] = $this->paste->get($id);
+         if (empty($this->data['pastes_item'])) {
+            show_404();
+         }
+         $this->data['title'] = $this->data['pastes_item']['language'];
+       }
+       public function create() {
+         $this->load->helper('form');
+         $this->load->library('form_validation');
+         $this->data['title'] = 'Create a news item';
+         $this->form_validation->set_rules('author', 'Author', 'required');
+         $this->form_validation->set_rules('language', 'Language', 'required');
+         if ($this->form_validation->run() === FALSE)
+         {   }
+         else {
+            $data = array (
+                   'author' => $this->input->post('author'),
+                   'language' => $this->input->post('language'),
+                   'description' => $this->input->post('description'),
+                   'body' => $this->input->post('body'),
+            );
+            if($this->paste->insert($data)) {
+               $this->load->view('paste/success');
+            }
+            else {
+	       echo "  Algo fue mal .....<br>";
+	    }
+         }
+       }
+    }
+    ?>
+
+_Vistas_: (1) views/paste/index.php
+{:lang="php"}
+    <?php foreach ($pastes as $pastes_item): ?>
+     <h2><?php echo $pastes_item['author'] ?></h2>
+     <div id="main">
+       <?php echo $pastes_item['language'] ?>
+       <?php echo $pastes_item['description'] ?>
+     </div>
+     <p><a href="pastes/<?php echo $pastes_item['id'] ?>">View paste</a></p>
+    <?php endforeach ?>
+    <hr>
+    <p><a href="pastes/create">Nueva entrada</a></p>
+
+_Vistas_: (2) views/paste/view.php
+{:lang="php"}
+    <?php
+    echo '<h2>'.$pastes_item['description'].'</h2>';
+    echo '<strong>' .$pastes_item['language'].'</strong>';
+    echo '<pre><code>' .$pastes_item['body'].'</code></pre>';
+    ?>
+
+_Vistas_: (3) views/paste/create.php
+{:lang="php"}
+    <h2>Crear un nuevo paste</h2>
+    
+    <?php echo validation_errors(); ?>
+    
+    <?php echo form_open('pastes/create') ?>
+      <label for="author">Author</label>
+      <input type="input" name="author" /><br />
+      <label for="language">Language</label>
+      <input type="input" name="language" /><br />
+      <label for="description">Description</label>
+      <input type="input" name="description" /><br />
+      <label for="body">Código</label>
+      <textarea name="body"></textarea><br />
+      <input type="submit" name="submit" value="Crear un nuevo item" />
+    </form>
+
+_Vistas_: (4) views/paste/success.php
+{:lang="html"}
+    <html>
+      <title>Record added</title>
+      <h1>Success</h1>
+      <p>Insertado con éxito</p>
+      <p><a href="../">Volver al índice</a></p>
+    </html>
+
+    
 

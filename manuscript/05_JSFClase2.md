@@ -69,7 +69,7 @@ Escribimos la clase FieldDisableListener.java
 
 Nuestra clase implementa la interfaz PhaseListener.   
 ¿Cuando es ejecutado el código?   
-Es ejecutado antes de la última fase RENDER_RESPONSE
+Es ejecutado antes de la última fase RENDER RESPONSE
 En el método beforePhase el *view tree* es procesado hacia abajo de forma
 recursiva. Cuando el InputText componente es encontrado, usa el ID para cotejar,
 nuestro valor a encontrar es *dummy-text-id*, entonces es cuando verifica
@@ -141,3 +141,103 @@ Y el fichero web.xml que no tiene nada especial para esta aplicación
             <url-pattern>*.xhtml</url-pattern>
         </servlet-mapping>
     </web-app>
+
+
+## Diferencia entre managed bean y CDI
+
+Un bean tiene una verdadera identidad en el ámbito del container.
+Antes de Java EE 6 no había una clara definición del término, hemos llamado bean a clases java y hemos usado beans durante años.
+
+¿De donde se parte? 
+Habían beans en las especificaciones EE, donde se incluye EJB beans
+y _JSF managed beans_, y otros third-party frameworks como Spring indrodujeron
+su propia idea del significado de bean.
+
+La *conclusión* a vistas de las diferencias es que no hay una común definición.
+
+Java EE 6, dio por válida la especificación Managed Bean, como así también la siguiente *objetos container-managed*, con un mínimo de restricciones, y conocidos como POJO.    
+Los beans soportan un pequeño conjunto de servicios básicos, tales como resource injection, interceptors y lifecycle callbacks. EJB y CDI se construyeron
+sobre este modelo.
+ 
+La _especificación CDI_ aporta nuevos servicios, estos pueden ser usados por el
+container para crear y destruir instancias de tus beans asociados con un contexto, injectarlos en otros beans, usarlos en expresiones El, especialializarlos
+con cualificadores (anotaciones) y agregarles interceptores y decoradores, sin
+modificar tu código ya existente. Sólo necesitarás agregar anotaciones.
+
+# Creamos bean que use CDI
+---------------------------
+
+{:lang="java"}
+    package mypackage;
+    import java.io.Serializable;
+    import java.util.ArrayList;
+    import java.util.List;
+    import javax.annotation.PostConstruct;
+      //import javax.faces.view.ViewScoped;
+      //import javax.enterprise.context.ApplicationScoped;
+      //import javax.inject.Named;
+    import javax.faces.bean.ManagedBean;
+    import javax.faces.bean.ApplicationScoped;
+     
+    //@Named
+    @ManagedBean
+    @ApplicationScoped
+    public class TestBean implements Serializable {
+     
+      private static final long serialVersionUID = 1L;
+     
+      private List<String> items;
+      private String item;
+      
+      @PostConstruct
+      private void init() {
+        items = new ArrayList<String>();
+        items.add("Item 1");
+        items.add("Item 2");
+        items.add("Item 3");
+      }
+     
+      public void addItem() {
+        if (item != null && !item.isEmpty()) {
+          items.add(item);
+          item = null;
+        }
+      }
+      public String getItem() {
+        return item;
+      }
+      public void setItem(String item) {
+        this.item = item;
+      }
+      public List<String> getItems() {
+         return items;
+      }
+    }
+
+{:lang="xhtml"}
+    <!DOCTYPE html>
+    <html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+     <h:head>
+       <title>CDI ViewScoped example</title>
+     </h:head>
+     <h:body>
+       <h:form>
+         <ui:repeat value="#{testBean.items}"
+                      var="item">
+          <div>
+            <h:outputText value="#{item}" />
+          </div>
+         </ui:repeat>
+         <br />
+         <h:inputText value="#{testBean.item}" />
+         <h:commandButton value="Add item"
+                 action="#{testBean.addItem}">
+           <f:ajax execute="@form" render="@form" />
+         </h:commandButton>
+       </h:form>
+     </h:body>
+    </html>
+
