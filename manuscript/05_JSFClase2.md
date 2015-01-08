@@ -4,31 +4,31 @@ Conociendo que una petición es procesada por JSF, a través de varias fases,
 intentaremos analizar alguna de éstas y además aprenderemos acerca del concepto
 JSF PhaseListener.
 
-[ejemplo fases JSF](http://www.itcuties.com/j2ee/jsf-phaselistener/)
+## JSF: eventos y ciclo de vida
 
-Es posible poner un *phase listener* a cada una de las fases. Podríamos modificar los datos enviados en la petición, si así nos lo propusiéramos, o bien podríamos
-modificar la vista que será renderizada. En este caso nos proponemos desactivar o bien esconder (disable/hide) un componente InputText presente en la vista.
+Es posible poner un *phase listener* a cada una de las fases. Podríamos modificar los datos enviados en la petición, si
+así nos lo propusiéramos, o bien podríamos modificar la vista que será
+renderizada.    
+En el siguiente ejemplo nos proponemos desactivar o bien esconder (disable/hide) un componente InputText presente en la vista.
 En concreto pretendemos que cuando el usuario introduzca _hide me_ como texto y
 el formulario sea enviado a la aplicación en el servidor, nuestro PhaseListener
 debería poner el atributo *rendered* de dicho componente a *false*.
-Mientras que introducir _disable me_ como texto del componente en cuestión, este
-debería ser *disabled*
+Mientras que introducir _disable me_ como texto del componente en cuestión, indicaría que debería ser *disabled*.
 
 Escribimos la clase FieldDisableListener.java
 
 {:lang="java"}
     package mypackage;
-    
     import javax.faces.component.UIComponent;
     import javax.faces.component.html.HtmlInputText;
     import javax.faces.event.PhaseEvent;
     import javax.faces.event.PhaseId;
     import javax.faces.event.PhaseListener;
-    
+        
     public class FieldDisableListener implements Pha
     seListener {
       private static final long serialVersionUID = -7607159318721947672L;
-       // La fase que interesa, en ésta es llamado el listener
+       // fase que interesa, en esta es llamado el listener
       private PhaseId phaseId = PhaseId.RENDER_RESPONSE;
        /**
         * Recorrido recursivo del árbol de componentes 
@@ -43,13 +43,13 @@ Escribimos la clase FieldDisableListener.java
         return phaseId;
       }
       private void processViewTree(UIComponent component) {
-        // Go to every child
+        // Pasando por todos los nodos hijos
         for (UIComponent child: component.getChildren()) {
           // Display el ID y tipo de componente
           System.out.println("+ " + child.getId() +
                            " ["+child.getClass()+"]");
-          // Si el componente es el nuestro, coteja ID, entonces 
-          // verifica si debe esconderlo
+          // conoce si es nuestro componente cotejando ID,
+          // y si es, verifica si debe esconderlo
           if ("dummy-text-id".equals(child.getId())) {
             // Obtiene el texto del componente
             HtmlInputText inputText = (HtmlInputText)child;
@@ -61,7 +61,7 @@ Escribimos la clase FieldDisableListener.java
             if ("disable me".equals(inputTextValue))
               inputText.setReadonly(true);
           }
-          // Process next node
+          // procesa siguiente nodo
           processViewTree(child);
         }
       }
@@ -70,15 +70,14 @@ Escribimos la clase FieldDisableListener.java
 Nuestra clase implementa la interfaz PhaseListener.   
 ¿Cuando es ejecutado el código?   
 Es ejecutado antes de la última fase RENDER RESPONSE
-En el método beforePhase el *view tree* es procesado hacia abajo de forma
+En el _método beforePhase_ el *view tree* es procesado hacia abajo de forma
 recursiva. Cuando el InputText componente es encontrado, usa el ID para cotejar,
 nuestro valor a encontrar es *dummy-text-id*, entonces es cuando verifica
 si el el valor del texto es *hide me* o *disable me*, con lo que el componente
 podrá ser modificado.
 
 El uso de un Phaselistener exige un detalle de configuración en el fichero
-faces-config.xml
-Para esto usamos la *tag*
+faces-config.xml Para esto usamos la *tag* phase-listener.
 En caso de usar más de un listener, el orden en que aparecen en el fichero
 de configuración es tenido en cuenta como órden de ejecución.
 
@@ -95,8 +94,9 @@ de configuración es tenido en cuenta como órden de ejecución.
        </lifecycle>
     </faces-config>
 
-El siguiente es el contenido del fichero *index.xhtml*, este es la vista
-de nuestra aplicación, podemos apreciar el componente InputText *dummy-text-id*
+El siguiente es el contenido del fichero *index.xhtml*, es la vista
+de nuestra aplicación, donde podemos apreciar el componente
+InputText *dummy-text-id*
 
 {:lang="xhtml"}
     <?xml version="1.0" encoding="UTF-8"?> 
@@ -117,7 +117,7 @@ de nuestra aplicación, podemos apreciar el componente InputText *dummy-text-id*
     </h:body> 
     </html>
 
-Y el fichero web.xml que no tiene nada especial para esta aplicación
+Y el fichero web.xml que no tiene nada especial para esta aplicación,
 
 {:lang="xhtml"}
     <!DOCTYPE web-app PUBLIC
@@ -142,20 +142,23 @@ Y el fichero web.xml que no tiene nada especial para esta aplicación
         </servlet-mapping>
     </web-app>
 
-
-## Diferencia entre managed bean y CDI
+## Diferencias entre managed bean y CDI
 
 Un bean tiene una verdadera identidad en el ámbito del container.
-Antes de Java EE 6 no había una clara definición del término, hemos llamado bean a clases java y hemos usado beans durante años.
+Viene a cuenta un poco de historia. Antes de Java EE 6 no había una clara
+definición del término, con lo cual se ha llamado beans a clases Java y
+hemos usado beans durante años.
 
 ¿De donde se parte? 
-Habían beans en las especificaciones EE, donde se incluye EJB beans
-y _JSF managed beans_, y otros third-party frameworks como Spring indrodujeron
-su propia idea del significado de bean.
+Había beans en las especificaciones EE, las que incluyen EJB beans
+y _JSF managed beans_, y otros frameworks third-party como Spring también
+indrodujeron su propia idea del significado de bean.
 
 La *conclusión* a vistas de las diferencias es que no hay una común definición.
 
-Java EE 6, dio por válida la especificación Managed Bean, como así también la siguiente *objetos container-managed*, con un mínimo de restricciones, y conocidos como POJO.    
+Java EE 6, dio por válida la *especificación de Managed Bean*, como así también
+la siguiente:   
+_objetos container-managed_, con un mínimo de restricciones, y conocidos como POJO.    
 Los beans soportan un pequeño conjunto de servicios básicos, tales como resource injection, interceptors y lifecycle callbacks. EJB y CDI se construyeron
 sobre este modelo.
  
@@ -164,8 +167,18 @@ container para crear y destruir instancias de tus beans asociados con un context
 con cualificadores (anotaciones) y agregarles interceptores y decoradores, sin
 modificar tu código ya existente. Sólo necesitarás agregar anotaciones.
 
-# Creamos bean que use CDI
----------------------------
+## Creación de beans usando CDI
+
+Nos proponemos codificar una aplicación que demuestre el uso del soporte CDI
+en JSF, para esto debemos trabajar con una API diferente a las empleadas con el
+modelo *managed bean*, concretamente usamos la notación Java *@Named*, con lo que importaríamos el paquete javax.inject.Named, y para nuestra propuesta
+en cuanto al ámbito o scope de nuestro bean usaríamos *Application* o *View*; una vez
+desplegada y probada la aplicación, podemos comentar las líneas @Named y
+@ViewScoped y volver a compilar la clase tal como la vez más abajo.
+Con este cambio en el código Java del modelo, nada cambiaría en el resultado. Se trata que CDI, puede ser usado en nuestra aplicación, sin afectar al código cuando se trata de
+una codificación que venía usando *managed bean*, como hemos dicho; el único cambio está
+en las notaciones; el soporte CDI es más eficiente, a tal punto que la comunidad recomienda su uso, quizás con la única excepción de los containers Tomcat,
+más que nada por no ser trivial la configuración de este servidor con soporte CDI.
 
 {:lang="java"}
     package mypackage;
@@ -181,8 +194,9 @@ modificar tu código ya existente. Sólo necesitarás agregar anotaciones.
      
     //@Named
     @ManagedBean
+    //@ViewScoped
     @ApplicationScoped
-    public class TestBean implements Serializable {
+    public class implements Serializable {
      
       private static final long serialVersionUID = 1L;
      
@@ -214,6 +228,7 @@ modificar tu código ya existente. Sólo necesitarás agregar anotaciones.
       }
     }
 
+La vista es como sigue,
 {:lang="xhtml"}
     <!DOCTYPE html>
     <html xmlns="http://www.w3.org/1999/xhtml"
@@ -221,7 +236,7 @@ modificar tu código ya existente. Sólo necesitarás agregar anotaciones.
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets">
      <h:head>
-       <title>CDI ViewScoped example</title>
+       <title>Managed bean  / CDI ViewScoped example</title>
      </h:head>
      <h:body>
        <h:form>
@@ -240,4 +255,9 @@ modificar tu código ya existente. Sólo necesitarás agregar anotaciones.
        </h:form>
      </h:body>
     </html>
+
+En este ejemplo se muestra, como un componente es afectado por el uso de *Ajax*, decir que JSF tiene un buen soporte para ajax, provee la tag _f:ajax_ para
+manejar llamadas ajax. El atributo *execute* admite como valores una lista de IDs de componentes los cuales deberían ser incluidos en una petición Ajax.
+Y *render* admite una lista de IDs de componente que serán *modificados* después
+de una petición Ajax.
 

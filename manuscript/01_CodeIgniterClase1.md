@@ -500,3 +500,4 @@ Se espera que los datos que se graben en la tabla de la BD, sean generados por e
 mismo proceso que se inicia con la recepción de la petición cliente, y no como
 se muestra aquí, tal como ya se comentó, esto sólo tiene como fin mostrar la
 incidencia del código del *controlador* en el resto de la lógica de negocio.
+

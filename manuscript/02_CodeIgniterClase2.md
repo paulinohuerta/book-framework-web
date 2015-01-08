@@ -141,7 +141,7 @@ Además sabemos que accedemos a nuestro modelo así:
 $this->user->get_all();    
 $this->file->upload();    
 
-Podriamos cargar automáticamente el modelo *asumiendo* que a nuestro controlador le corresponde un nombre de modelo en singular.    
+Podríamos cargar automáticamente el modelo *asumiendo* que a nuestro controlador le corresponde un nombre de modelo en singular.    
 En nuestro MY_Controller.php procedemos como sigue:    
 
 {:lang="php"}
@@ -186,9 +186,12 @@ Si bien es una sutil diferencia, trabajando en grandes aplicaciones, con extenso
 ficheros, pequeños cambios como estos pueden hacer la diferencia.    
 Pero lo que nos debe quedar en limpio que un código más conciso y sucinto es *más mantenible*.
 
-Una vez nuestra andadura por MY_Model y MY_Controller podemos proponernos lo siguiente:
-Trabajamos sobre la *tabla pastes*
-su estructura es la siguiente.
+## Un ejemplo de aplicación usando CI
+
+Una vez nuestra andadura por MY_Model y MY_Controller podemos proponernos el código de
+una aplicación que recoja las distintas cuestiones y aspectos hasta aquí comentados.
+
+Trabajamos sobre la *tabla pastes* de la BD, y su estructura es la siguiente.
 
     CREATE TABLE pastes (
        id int(10) unsigned NOT NULL auto_increment,
@@ -196,14 +199,17 @@ su estructura es la siguiente.
        language varchar(20) NOT NULL,
        description varchar(50) default NULL,
        body text NOT NULL,
-       created_on timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+       created_on timestamp NOT NULL default CURRENT_TIMESTAMP
+          on update CURRENT_TIMESTAMP,
        PRIMARY KEY  (id)
     ) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8;
 
-1. usemos singular
-2. mostremos get_all
-3. mostremos view
-4. al final demos posiblidad de insertar un nuevo registro.
+Deseamos codificar una aplicación que tendrá en cuenta los aspectos y cuestiones siguientes,
+
+* Usemos la convención nombre de clase del modelo en singular.
+* Mostremos un índice de pastes, invocando en el modelo "get_all".
+* Hagamos posible la selección de un paste, desde el índice, invocamos "get_view".
+* Desde el índice dar posibilidad de poder insertar un nuevo paste.
 
 _Modelo_: models/paste_model.php
 {:lang="php"}
@@ -307,6 +313,4 @@ _Vistas_: (4) views/paste/success.php
       <p>Insertado con éxito</p>
       <p><a href="../">Volver al índice</a></p>
     </html>
-
-    
 
