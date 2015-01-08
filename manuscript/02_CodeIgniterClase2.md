@@ -110,10 +110,10 @@ Y entonces podemos cargar la vista con:
 {:lang="php"}
     $this->load->view($view, $this->data);
 
-Ahora sí tenemos podemos tener un controlador como sigue:
+Ahora sí tenemos un controlador como sigue:
 
 {:lang="php"}
-<?php
+    <?php
     class Pastes extends MY_Controller {
       public function __construct()
       {
@@ -126,6 +126,7 @@ Ahora sí tenemos podemos tener un controlador como sigue:
         $this->data['title'] = 'Pastes archive';
       }
      }
+    ?>
 
 No está mal, pues nos proponíamos *claridad*, y aún podemos ampliar la técnica para conseguir cargar el modelo 
 también en el controlador.
@@ -138,8 +139,8 @@ La idea es cargar modelo basado en convenciones, algunas de estas ya hemos usado
 Recordemos: *singular_recurso_model.php* lo que sería para una tabla *users* user_model.php; mientras que para un modelo que manipula un ficheros debería ser file_model.php.
 
 Además sabemos que accedemos a nuestro modelo así:   
-$this->user->get_all();    
-$this->file->upload();    
+    $this->user->get_all();    
+    $this->file->upload();    
 
 Podríamos cargar automáticamente el modelo *asumiendo* que a nuestro controlador le corresponde un nombre de modelo en singular.    
 En nuestro MY_Controller.php procedemos como sigue:    
