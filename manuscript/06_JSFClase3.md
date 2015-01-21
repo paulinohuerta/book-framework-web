@@ -236,12 +236,13 @@ Este sería el index_xhtml que muestra la figura 3.5
     </html>
 
 Características de este estadio:
+
 - el _managed bean_, tiene como atributo una lista de objetos tipo _Property_.
 - el scope View para el _managed bean_.
 - Un objeto Property esta formado por dos objetos tipo String, Key y Value.
 
 La definición de la clase ViewManager:
-{:lang="xhtml"}
+{:lang="java"}
     package com.sample.bean;
     import java.io.Serializable;
     import java.util.ArrayList;
@@ -254,20 +255,6 @@ La definición de la clase ViewManager:
     public class ViewManager implements Serializable {
        ArrayList<Property> cacheList = new ArrayList ();
        private Property item = new Property();
-       private String key;
-       private String value;
-       public String getKey() {
-           return key;
-       }
-       public void setKey(String key) {
-           this.key = key;
-       }
-       public String getValue() {
-           return value;
-       }
-       public void setValue(String value) {
-           this.value = value;
-       }
        public void add() {
            cacheList.add(item);
            item = new Property();
@@ -281,7 +268,7 @@ La definición de la clase ViewManager:
     }
 
 Y la definición de la clase _Property_
-{:lang="xhtml"}
+{:lang="java"}
     package com.sample.model;
     public class Property {
       private String key;
@@ -299,3 +286,43 @@ Y la definición de la clase _Property_
          this.value = value;
       }
     }
+
+Un par de cuestiones más antes de pasar al próximo estadio:
+
+- procedemos a validar como _requerido_ el campo Key del formulario.
+- Cuando aún no hay datos interesa mostrar un texto del tipo _tabla vacía_.
+
+¿Qué nos ofrece JSF para trabajar esto?
+
+Para la primera, el atributo _required_ del elemento _inputText_, y si además
+deseamos escribir un mensaje agregamos un _componente message_.
+Tener en cuenta que un espacio en blanco puede ser una entrada perfectamente
+válida. El required="true" sólo no permite _empty inputs_.
+Si adoptamos que el campo Key sea obligatoriamente rellenado por el usuario,
+podríamos tener en el index_xhtml el siguiente código
+{:lang="xhtml"}
+    <h:inputText id="kName" required="true"
+          value="#{viewManager.item.key}"
+          requiredMessage="campo Key es requerido"/>
+    <h:message id="m1" for="kName" style="color:red"/>
+
+Para la segunda cuestión podemos escribir un _outputText_ como se muestra,
+debajo del formulario y antes del _dataTable_
+
+{:lang="xhtml"}
+    <h:outputText value="No hay datos en la Tabla!"
+       rendered="#{empty viewManager.cacheList}" />
+    <h:dataTable rendered="#{not empty viewManager.cacheList}"
+       value="#{viewManager.cacheList}" var="item">
+       <!-- el resto -->
+    </h:dataTable>
+
+Con lo que si el miembro lista de items del _managed bean_ está vació
+será _renderizado_ el texto asignado al _atributo value_.
+Por otra parte podemos también condicionar la renderización del componente
+_dataTable_, usando el atributo _rendered_, en este caso interesa mostrar
+si la lista es no vacía.
+
+Para el siguiente estadio de la app nos proponemos *editar* cualquiera de
+las entradas, permitiendo _modificar y salvar_ los cambios; implicará *definir
+nuevas acciones en la clase* y retocar la vista como es natural.
