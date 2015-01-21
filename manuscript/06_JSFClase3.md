@@ -192,124 +192,110 @@ Podrías comprobar, que si el bean administrado es SessionScoped, en lugar
 de ver en el formulario los inputText en blanco, estos conservarían su último
 valor.
 
-Respecto a lo anterior _nos queda como tarea pendiente_ averiguar como podemos
-dar valores iniciales al managed bean.   
-Veamos la lógica de esta cuestión, si es el framework quien crea el objeto,
-no debemos
+Respecto a lo anterior _nos queda pendiente_ averiguar como podemos
+dar *valores iniciales al managed bean*. Nuestra lógica nos llevaría a decir
+que el constructor podría acometer dicha inicialización, pero no es eso lo
+que queremos, se trata que el managed bean, y no otros bean, sea creado
+por el framework con unos valores concretos para algunos de sus miembros.
+
+Siguiendo con el nuevo estadio de la app, podríamos tener ahora la 
+siguiente y única vista,
 
 ![Figura 3.5](images/Pantallazo31.png){:center=""}
 
-La única vista:
+Este sería el index_xhtml que muestra la figura 3.5
+{:lang="xhtml"}
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+    <h:head>
+    </h:head>
+    <h:body>
+       <h2>CRUD estadio dos, usando List y View Scope</h2>
+       <h:form>
+         <p>Key:
+           <h:inputText value="#{viewManager.item.key}" />
+         </p>
+         <p>Value:
+           <h:inputText value="#{viewManager.item.value}" />
+         </p>
+         <p>
+           <h:commandButton value="add" action="#{viewManager.add}" />
+         </p>
+       </h:form>
+       <h:dataTable value="#{viewManager.cacheList}" var="item">
+        <h:column>
+         Key <h:outputText value="#{item.key}" />
+        </h:column>
+        <h:column>
+         Value <h:outputText value="#{item.value}" />
+        </h:column>
+       </h:dataTable
+    </h:body>
+    </html>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:c="http://java.sun.com/jsp/jstl/core">
-<h:head>
-</h:head>
-<h:body>
+Características de este estadio:
+- el _managed bean_, tiene como atributo una lista de objetos tipo _Property_.
+- el scope View para el _managed bean_.
+- Un objeto Property esta formado por dos objetos tipo String, Key y Value.
 
-	<h2>CRUD estadio dos, usando List y View Scope</h2>
-		<h:form>
-			<p>Key:
-				<h:inputText value="#{viewManager.item.key}" />
-			</p>
-			<p>Value:
-				<h:inputText value="#{viewManager.item.value}" />
-			</p>
-			<p>
-				<h:commandButton value="add" action="#{viewManager.add}" />
-			</p>
-		</h:form>
-		<h:dataTable value="#{viewManager.cacheList}" var="item">
-			<h:column>
-				Key <h:outputText value="#{item.key}" />
-			</h:column>
-			<h:column>
-				Value <h:outputText value="#{item.value}" />
-                        </h:column>
-		</h:dataTable>
-</h:body>
-</html>
-
-
-Y la clase
-
-package com.sample.bean;
-
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
-
-import com.sample.model.Property;
-
-@ManagedBean
-@ViewScoped
-public class ViewManager   implements Serializable{
-
-	ArrayList<Property>   cacheList = new ArrayList ();
-	private Property item = new Property();
-	private String key;
-	private String value;
-
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
-	public void add() {
-		cacheList.add(item);
-		item = new Property();
+La definición de la clase ViewManager:
+{:lang="xhtml"}
+    package com.sample.bean;
+    import java.io.Serializable;
+    import java.util.ArrayList;
+    import java.util.List;
+    import javax.faces.bean.ManagedBean;
+    import javax.faces.bean.ViewScoped;
+    import com.sample.model.Property;
+    @ManagedBean
+    @ViewScoped
+    public class ViewManager implements Serializable {
+       ArrayList<Property> cacheList = new ArrayList ();
+       private Property item = new Property();
+       private String key;
+       private String value;
+       public String getKey() {
+           return key;
+       }
+       public void setKey(String key) {
+           this.key = key;
+       }
+       public String getValue() {
+           return value;
+       }
+       public void setValue(String value) {
+           this.value = value;
+       }
+       public void add() {
+           cacheList.add(item);
+           item = new Property();
         }
-
         public List getCacheList() {
-		return cacheList;
+           return cacheList;
         }
         public Property getItem() {
            return item;
         }
-}
+    }
 
-La clase Property
-
-package com.sample.model;
-
-public class Property {
-
-	private String key;
-
-	private String value;
-
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
-}
+Y la definición de la clase _Property_
+{:lang="xhtml"}
+    package com.sample.model;
+    public class Property {
+      private String key;
+      private String value;
+      public String getKey() {
+         return key;
+      }
+      public void setKey(String key) {
+         this.key = key;
+      }
+      public String getValue() {
+         return value;
+      }
+      public void setValue(String value) {
+         this.value = value;
+      }
+    }
