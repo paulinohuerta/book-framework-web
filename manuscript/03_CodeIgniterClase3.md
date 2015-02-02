@@ -255,14 +255,14 @@ secuencialmente, en el orden que los _observers_ han sido definidos.
 Los _observers_ también pueden tomar parámetros en sus nombres, similar a los formularios CodeIgniter (Form Validation library).    
 Los parámetros son accedidos en $this->callback_parameters:
 {:lang="php"}
-    public $before_create = array( 'data_process(name)' );
-    public $before_update = array( 'data_process(date)' );
+    public $before_create = array('data_process(name)');
+    public $before_update = array('data_process(date)');
     protected function data_process($row)
     {
-     $row[$this->callback_parameters[0]] = $this->_process($row[$this->callback_parameters[0]]);
+     $row[$this->callback_parameters[0]] =
+       $this->_process($row[$this->callback_parameters[0]]);
      return $row;
     }
-
 Para seguir con el ejemplo deberíamos repasar nuestra situación, en este momento _Paste_ extiende MY_Model, y el contenido de MY_Model es
 {:lang="php"}
     class Paste_model extends MY_Model
@@ -279,7 +279,7 @@ Pasaría a estar con el siguiente nuevo código:
     }
 Y luego dos modificaciones debemos realizar en la clase MY_Model, que como sabemos la tenemos en core/MY_Model.   
 En el _método insert()_, deberíamos incluir
-{:lanng="php"}
+{:lang="php"}
     $data = $this->trigger('before_create', $data);
     // justo antes de
     $success = $this->db->insert($this->_table, $data);
@@ -291,13 +291,14 @@ Y la otra modificación consiste en agregar la codificación del método _tigger()_
       if (isset($this->$event) && is_array($this->$event))
       {
        foreach($this->$event as $method) {
-         if (strpos($method, '('))
-         {
-           preg_match('/([a-zA-Z0-9\_\-]+)(\(([a-zA-Z0-9\_\-\., ]+)\))?/', $method, $matches);
-           $method = $matches[1];
-           $this->callback_parameters = explode(',', $matches[3]);
-         }
-         $data = call_user_func_array(array($this, $method), array($data, $last));
+        if (strpos($method, '('))
+        {
+         preg_match('/([a-zA-Z0-9\_\-]+)(\(([a-zA-Z0-9\_\-\., ]+)\))?/',
+	            $method, $matches);
+         $method = $matches[1];
+         $this->callback_parameters = explode(',', $matches[3]);
+        }
+        $data = call_user_func_array(array($this, $method), array($data, $last));
        }
       }
       return $data;
