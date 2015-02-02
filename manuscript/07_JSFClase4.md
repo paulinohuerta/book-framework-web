@@ -36,18 +36,15 @@ También se ha usado la faceta _ui:repeat_ para realizar el bucle sobre la lista,
 no nos interesa generar una tabla HTML.
 
 En el siguiente ejemplo usamos _f:viewParam_ dentro de una faceta _f:metadata_
-de la vista _cursoView.xhtml_.    
-Con el componente _h:link_  siguient
+de la vista _cursoView.xhtml_; entonces con este componente _h:link_
 {:lang="xhtml"}
     <h:link outcome="cursoView.xhtml?code=#{v_curso.code}"
        value="#{v_curso.title}" />
-
 será renderizado _cursoView.xhtml_, el cual tiene
 {:lang="xhtml"}
     <f:metadata>
       <f:viewParam name="code" value="#{cursoHome.cargar}" />
     </f:metadata>
-
 Donde _f:viewParam_ procesa el parámetro GET, y tal como lo hace un componente h:inputText, realiza setting,
 conversión y validación, con lo que el valor del parámetro _code_ sirve para realizar el _set_ del atributo
 _cargar_ del bean _cursoHome_, representado como _#{cursoHome.cargar}_ en el atributo value.    
@@ -66,7 +63,8 @@ Veamos, tendríamos los siguientes bloque de código:
     </f:metadata>
 
 *f:viewParam*
-Set el valor durante la fase _update model.
+
+Set el valor durante la fase _update model_.
 
 El valor asignado no está disponible durante @PostConstruct, entonces necesitas
 agegar un f:event dentro de f:metadata para inicializar los valores, o bien y más simple
@@ -85,11 +83,10 @@ Permite anidar f:converter y f:validator para una más detallada conversión/valid
 
 *@ManagedProperty*
 
-Set los valores inmediátamente luego de la construcción del bean.
-es
+Set los valores inmediátamente luego de la construcción del bean.    
 El valor está disponible durante @PostConstruct lo cual permite inicialización de otras propiedades basadas sobre los valores.
 
-[Más sobre esto]http://bhttp://balusc.blogspot.com.es/2011/09/communication-in-jsf-20.html#ProcessingGETRequestParameters
+Puedes [leer más](http://bhttp://balusc.blogspot.com.es/2011/09/communication-in-jsf-20.html#ProcessingGETRequestParameters) sobre el uso y proceso de parámetros GET 
 
 ## CRUD: estadio final 
 
@@ -210,4 +207,3 @@ Y en el formulario retocamos el elemento h:dataTable
                          action="#{viewManager.delete(item)}" />
       </h:column>
     </h:dataTable>
-  

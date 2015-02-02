@@ -227,7 +227,7 @@ controlador ha obtenido del modelo. El fichero views/paste/_row tiene:
 La idea es que este código sea reusado en otras vistas y evitar escribirlo nuevamente cuando otra vista deba mostrar una tabla con
 el resultado de una consulta sobre la Base de Datos.   
 Los datos en $result que usa la vista fueron obtenidos en el método del controlador por ejemplo así:
-{lang="php"}
+{:lang="php"}
     <?
     $this->data['result'] = $this->paste->get_all();
     ?>
