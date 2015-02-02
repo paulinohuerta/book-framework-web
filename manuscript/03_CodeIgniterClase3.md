@@ -114,7 +114,7 @@ por esta otra
       </p>
     </div>
 Crearíamos una carpeta _application/presenters_, en la cual ponemos el fichero _paste_presenter.php_, contendrá la clase presenter para
-nuestro objet paste, así podemos extrer la lógica de nuestra vista poniéndola en la clase, por ejemplo el título los extraeríamos así,
+nuestro objeto paste, así podemos extrer la lógica de nuestra vista poniéndola en la clase, por ejemplo el título los extraeríamos así,
 {:lang="php"}
     <?
     public function title() {
@@ -160,9 +160,9 @@ Mientras que en el controlador en controllers/paste.php, para el método/acción _
      $this->load->view('paste/show', $this->data);
     }
     ?>
-Como se ve la idea es en lugar de pasar a la vista directamente el _objeto paste_ desde nuestro modelo, primero lo _envolvemos_
+Como se ve, la idea es en lugar de pasar a la vista directamente el _objeto paste_ desde nuestro modelo, primero lo _envolvemos_
 en nuestro _presenter_.    
-Con estoo el _presenter_ representa la _cara pública_ de los datos recuperados de la base de datos, en este caso una fila de la
+Con esto el _presenter_ representa la _cara pública_ de los datos recuperados de la base de datos, en este caso, una fila de la
 tabla paste.    
 Teniendo en cuenta que necesitamos cargar nuestro presenter para que pueda ser usado por todos los métodos tiene sentido cargarlo
 al inicio del _controlador_, para esto necesitamos,
@@ -177,12 +177,12 @@ hemos practicado _DRY_.
 ## Partials
 
 A veces repetimos bloques de código, por ejemplo en la construcción de una aplicación CRUD _replicaríamos_ el código del formulario
-para _agregar_ y _editar_ o también podríamos estar repitiendo código ya escrito antes cuando mostramos en una tabla los datos
-extraídos de la base de datos de una fila. En el _espíritu de DRY_ podemos extrer el código replicado y ponerlo en algo así como
+para _agregar_ y _editar_ o también podríamos estar repitiendo código ya escrito antes, cuando mostramos en una tabla los datos
+extraídos de la base de datos de una fila. En el _espíritu de DRY_ podemos extraer el código replicado y ponerlo en algo así como
 un *partial*.
 
-Construyendo un pratial podemos eliminar código duplicado, la convención usaada es que u nobre comience con _underscoe_, luego
-distinguiremos vistas llamadas directamente desde el controlador de los _partials_ que están pensados para ser usado por más
+Construyendo un partial podemos eliminar código duplicado, la convención usada es que su nombre comience con _underscore_; luego
+distinguiremos vistas llamadas directamente desde el controlador, de los _partials_ que están pensados para ser usado por más
 de una vista.
 
 Crearíamos un fichero _partial_helper.php_ en la carpeta _application/helpers_, podríamos escribir una librería, pero sólo nos
@@ -208,7 +208,7 @@ En nuestro helper definimos una simple y única función, la llamaremos _partial()
       return $output;
     }
     ?>
-Y pdoría ser usado en una vista de esta manera:
+Y podría ser usado en una vista de esta manera:
 {:lang="php"}
     <div id="paste">
       <h1><?=$title?></h1>
@@ -236,8 +236,8 @@ Los datos en $result que usa la vista fueron obtenidos en el método del controla
 
 Muchas veces necesitas alterar el modelo antes que nuevos datos sean insertados.   
 ¿Cómo podría hacerse esto?    
-El patrón MVC indica que esta clases de operaciones deberían estar en el modelo. Para facilitar esto, MY_Model contiene una serie
-de eliminación de callbacks/observers, que nos son otra cosa que _métodos que serán llamadas en ciertos puntos_.   
+El patrón MVC indica que esta clase de operaciones deberían estar en el modelo. Para facilitar esto, MY_Model podría contener
+callbacks/observers, que nos son otra cosa que _métodos que serán llamadas en ciertos puntos_.   
 
 La lista completa de _observers_ es la siguiente: 
 
@@ -311,7 +311,7 @@ En el _método insert()_, deberíamos incluir
     $success = $this->db->insert($this->_table, $data);
     // el resto del código del método
     ?>
-Y la otra modificación consiste en agregar la codificación del método _tigger()_ a la clase y grabar en core/MY_Model.   
+Y la otra modificación consiste en agregar la codificación del método _tigger()_ a la clase y, grabar en core/MY_Model.   
 {:lang="php"}
     <?
     public function trigger($event, $data = FALSE, $last = TRUE)

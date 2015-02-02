@@ -187,16 +187,13 @@ más que nada por no ser trivial la configuración de este servidor con soporte CD
     import java.util.List;
     import javax.annotation.PostConstruct;
       //import javax.faces.view.ViewScoped;
-      //import javax.enterprise.context.ApplicationScoped;
       //import javax.inject.Named;
     import javax.faces.bean.ManagedBean;
-    import javax.faces.bean.ApplicationScoped;
+    import javax.faces.bean.SessionScoped;
      
-    //@Named
     @ManagedBean
-    //@ViewScoped
-    @ApplicationScoped
-    public class implements Serializable {
+    @SessionScoped
+    public class TestBean implements Serializable {
      
       private static final long serialVersionUID = 1L;
      
@@ -211,11 +208,12 @@ más que nada por no ser trivial la configuración de este servidor con soporte CD
         items.add("Item 3");
       }
      
-      public void addItem() {
+      public String addItem() {
         if (item != null && !item.isEmpty()) {
           items.add(item);
           item = null;
         }
+	return null;
       }
       public String getItem() {
         return item;

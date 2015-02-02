@@ -8,7 +8,7 @@ eliminación, al principio nos proponemos algunas indicaciones sobre el uso de pa
 La etiqueta _f:param_ permite pasar parámetros a un componente, en el siguiente ejemplo vemos
 un uso de _f:param_ en un componente _h:outputFormat_
 
-Tal como tenemos el código de _index.xhtml_ al final de la clase anterior, puedes agregar el
+Tal como tenemos el código de _index.xhtml_ al final de la clase anterior, puedes agregar 
 al final del body, luego del componente h:dataTable
 {:lang="xhtml"}
     <ul>
@@ -51,7 +51,7 @@ _cargar_ del bean _cursoHome_, representado como _#{cursoHome.cargar}_ en el atr
 Si el atributo value se omite, entonces queda disponible en la vista en _#{code}_
 	
 ¿Qué diferencia existe en usar @ManagedProperty en relación a f:viewParam?
-Veamos, tendríamos los siguientes bloque de código:
+Veamos, tendríamos los siguientes  dos bloques de código:
 
 {:lang="java"}
     @ManagedProperty(value = "#{param.id}")
@@ -68,9 +68,8 @@ Set el valor durante la fase _update model_.
 
 El valor asignado no está disponible durante @PostConstruct, entonces necesitas
 agegar un f:event dentro de f:metadata para inicializar los valores, o bien y más simple
-puedes usar f:viewAction para el mismo fin.
+puedes usar f:viewAction para el mismo fin.    
 
-Ejemplo:
 Permite anidar f:converter y f:validator para una más detallada conversión/validación; pudiéndose usar un h:message. Ejemplo:
 {:lang="xhtml"}
     <f:metadata>
@@ -84,9 +83,10 @@ Permite anidar f:converter y f:validator para una más detallada conversión/valid
 *@ManagedProperty*
 
 Set los valores inmediátamente luego de la construcción del bean.    
+
 El valor está disponible durante @PostConstruct lo cual permite inicialización de otras propiedades basadas sobre los valores.
 
-Puedes [leer más](http://bhttp://balusc.blogspot.com.es/2011/09/communication-in-jsf-20.html#ProcessingGETRequestParameters) sobre el uso y proceso de parámetros GET 
+Puedes [leer más](http://balusc.blogspot.com.es/2011/09/communication-in-jsf-20.html#ProcessingGETRequestParameters) sobre el uso y proceso de parámetros GET 
 
 ## CRUD: estadio final 
 
@@ -175,8 +175,8 @@ El formulario que se encarga de renderizar la tabla con los datos y permitir la 
     </h:form>
 Vemos que el método de la clase a ejecutar tras el envío del cliente, la acción del h:commandButton, recibirá un parámetro el cual
 es un objeto item dentro de la tabla.   
-En los estadios de la app desarrollados la clase anterior se optó por mostrar los datos usando ui:repeat y h:outputText    
-Este es el código del método edit de la clase,
+En los estadios de la app desarrollados la clase anterior se optó por mostrar los datos usando ui:repeat y h:outputText.    
+Este es el código del _método edit_ de la clase,
 {:lang="java"}
     public void edit(Property item) {
       this.item = item;
