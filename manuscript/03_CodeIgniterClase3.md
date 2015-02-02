@@ -10,9 +10,11 @@ un item_.
 ## Editando un item
 La nueva ruta a tener en cuenta debe ser:
 {:lang="php"}
+    <?
     $route['pastes/edit/(:num)'] = 'paste/edit/$1';
+    ?>
 Procedemos a codificar el *método edit* en el _controlador paste.php_
-{lang:"php"}
+{:lang="php"}
     <?
     public function edit($id)
     {
@@ -45,7 +47,9 @@ Con la instrucción _$this->load->library('form_validation')_ hemos cargado la cl
 Sabiendo que las librerías de CodeIgniter se encuentran en la carpeta system/libraries y que normalmente la cargaríamos usando la siguiente función
 de inicialización:
 {:lang="php"}
+    <?
     $this->load->library('class_name');
+    ?>
 Esta clase tiene métodos que nos permiten validar campos de entrada de datos en base a reglas que suministramos. En este punto deberías leer
 la guía CodeIgniter para la entrada [for_validation](https://ellislab.com/codeigniter/user-guide/libraries/form_validation.html).   
 En nuestro caso respetando los tres argumentos del método *set_rules*, queremos que el campo author y language no se dejen en blanco, es decir
@@ -55,9 +59,11 @@ entrada de datos, retorna FALSE.
 El código del _método edit_ termina cargando el array $data con las entradas del formulario, se ha usado la _clase input_, ésta es inicializada
 automáticamente por el sistema con lo que no debemos preocuparnos y la usamos directamente.   
 {:lang="php"}
+    <?
     $something = $this->input->post('something');
     // consigue lo mismo que
     $something = $_POST['something'];
+    ?>
 Luego la _clase input_ sirve para dos propuestas:
 
 - Pre-procesar datos de entrada globales.
@@ -67,12 +73,14 @@ _server()_ y _cookie()_.
 Tenemos una ventaja al usar $this->input->post('something'), que consiste en el chequeo sobre la existencia del item _something_, en caso que
 no exista, retorna _false_, esto no ocurre si usamos para el _fetch_ del item $_POST, en concreto deberíamos tener:
 {:lang="php"} 
+    <?
     if ( ! isset($_POST['something'])) {
       $something = FALSE;
     }
     else {
       $something = $_POST['something'];
     }
+    ?>
 Por último, la codificación de _edit()_ ejecuta $this->paste->update($id,$data) del modelo con lo que tomaría efecto la modificación en la
 Base de Datos.  
 Como vemos en nuestro método no se invoca a ninguna vista debido a que al ser una tarea repetida, por DRY se procede con ello en el controlador
@@ -108,9 +116,11 @@ por esta otra
 Crearíamos una carpeta _application/presenters_, en la cual ponemos el fichero _paste_presenter.php_, contendrá la clase presenter para
 nuestro objet paste, así podemos extrer la lógica de nuestra vista poniéndola en la clase, por ejemplo el título los extraeríamos así,
 {:lang="php"}
+    <?
     public function title() {
        return $this->paste->description;
     }
+    ?>
 Con lo que la clase nos quedaría como sigue
 {:lang="php"}
     <?
@@ -143,11 +153,13 @@ Con lo que la clase nos quedaría como sigue
     ?>
 Mientras que en el controlador en controllers/paste.php, para el método/acción _show()_ tendríamos:
 {:lang="php"}
+    <?
     public function show($id)
     {
      $this->data['paste'] = new Paste_Presenter($this->paste->get($id));
      $this->load->view('paste/show', $this->data);
     }
+    ?>
 Como se ve la idea es en lugar de pasar a la vista directamente el _objeto paste_ desde nuestro modelo, primero lo _envolvemos_
 en nuestro _presenter_.    
 Con estoo el _presenter_ representa la _cara pública_ de los datos recuperados de la base de datos, en este caso una fila de la
@@ -155,7 +167,9 @@ tabla paste.
 Teniendo en cuenta que necesitamos cargar nuestro presenter para que pueda ser usado por todos los métodos tiene sentido cargarlo
 al inicio del _controlador_, para esto necesitamos,
 {:lang="php"}
+    <?
     require_once APPPATH . 'presenters/paste_presenter.php';
+    ?>
 y habríamos acabado.    
 Agregando un nivel de abstracción hemos conseguido una vista sucinta y clara estéticamente, pero lo más importante es que 
 hemos practicado _DRY_.
@@ -214,7 +228,9 @@ La idea es que este código sea reusado en otras vistas y evitar escribirlo nueva
 el resultado de una consulta sobre la Base de Datos.   
 Los datos en $result que usa la vista fueron obtenidos en el método del controlador por ejemplo así:
 {lang="php"}
+    <?
     $this->data['result'] = $this->paste->get_all();
+    ?>
 
 ## Observers y callbacks
 
@@ -242,6 +258,7 @@ Tendremos en cuenta crear un observer $before_create, donde se realiza la asigna
 respetar. 
 
 {:lang="php"}
+    <?
     class Paste extends MY_Model
     {
       public $before_create = array( 'timestamps' );
@@ -251,11 +268,13 @@ respetar.
        return $paste;
       }
     }
+    ?>
 Recordando de retornar el mismo objeto que la función recibe, en el ejemplo $row. Cada observer sobreescribe los datos del predecesor,
 secuencialmente, en el orden que los _observers_ han sido definidos.    
 Los _observers_ también pueden tomar parámetros en sus nombres, similar a los formularios CodeIgniter (Form Validation library).    
 Los parámetros son accedidos en $this->callback_parameters:
 {:lang="php"}
+    <?
     public $before_create = array('data_process(name)');
     public $before_update = array('data_process(date)');
     protected function data_process($row)
@@ -264,13 +283,17 @@ Los parámetros son accedidos en $this->callback_parameters:
        $this->_process($row[$this->callback_parameters[0]]);
      return $row;
     }
+    ?>
 Para seguir con el ejemplo deberíamos repasar nuestra situación, en este momento _Paste_ extiende MY_Model, y el contenido de MY_Model es
 {:lang="php"}
+    <?
     class Paste_model extends MY_Model
     {
     }
+    ?>
 Pasaría a estar con el siguiente nuevo código:
 {:lang="php"}
+    <?
     class Paste extends MY_Model {
       public $before_create = array( 'timestamps' );
       protected function timestamps($paste) {
@@ -278,15 +301,19 @@ Pasaría a estar con el siguiente nuevo código:
         return $paste;
       }
     }
+    ?>
 Y luego dos modificaciones debemos realizar en la clase MY_Model, que como sabemos la tenemos en core/MY_Model.   
 En el _método insert()_, deberíamos incluir
 {:lang="php"}
+    <?
     $data = $this->trigger('before_create', $data);
     // justo antes de
     $success = $this->db->insert($this->_table, $data);
     // el resto del código del método
+    ?>
 Y la otra modificación consiste en agregar la codificación del método _tigger()_ a la clase y grabar en core/MY_Model.   
 {:lang="php"}
+    <?
     public function trigger($event, $data = FALSE, $last = TRUE)
     {
       if (isset($this->$event) && is_array($this->$event))
@@ -304,6 +331,7 @@ Y la otra modificación consiste en agregar la codificación del método _tigger()_
       }
       return $data;
     }
+    ?>
 Retocando el modelo a través de la clase MY_Model y la clase Paste, hemos agregado una función que llamamos _timestamps()_, la cual se ocupa
 de asignar un valor concreto al array que luego será el parámetro del _método insert()_ es decir estamos preparando con esta asignación el 
 valor a ser asignado en una de las columnas de la tabla pastes al ejecutar _insert()_.   
