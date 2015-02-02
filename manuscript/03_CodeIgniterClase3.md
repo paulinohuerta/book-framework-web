@@ -7,7 +7,7 @@ hemos definido el controlador MY_Controller y el modelo MY_Model, lo que seguire
 en permitir la _modificación_ de una fila en la Base de datos, que desde la persepectiva del usuario es ofrecerle la posibilidad de _editar
 un item_.
 
-### Editando un item
+## Editando un item
 La nueva ruta a tener en cuenta debe ser:
 {:lang="php"}
     $route['pastes/edit/(:num)'] = 'paste/edit/$1';
@@ -54,15 +54,16 @@ El método _run()_ retorna TRUE, en el caso que todas las reglas no detecten fall
 entrada de datos, retorna FALSE.   
 El código del _método edit_ termina cargando el array $data con las entradas del formulario, se ha usado la _clase input_, ésta es inicializada
 automáticamente por el sistema con lo que no debemos preocuparnos y la usamos directamente.   
-El uso de 
 {:lang="php"}
     $something = $this->input->post('something');
     // consigue lo mismo que
     $something = $_POST['something'];
 Luego la _clase input_ sirve para dos propuestas:
+
 - Pre-procesar datos de entrada globales.
 - Ofrecer algún _helper_ para conseguir la entrada desde un formulario y pre-procesarla, nosotros hemos usado _post()_, existen otros dos
 _server()_ y _cookie()_.   
+
 Tenemos una ventaja al usar $this->input->post('something'), que consiste en el chequeo sobre la existencia del item _something_, en caso que
 no exista, retorna _false_, esto no ocurre si usamos para el _fetch_ del item $_POST, en concreto deberíamos tener:
 {:lang="php"} 
@@ -77,7 +78,7 @@ Base de Datos.
 Como vemos en nuestro método no se invoca a ninguna vista debido a que al ser una tarea repetida, por DRY se procede con ello en el controlador
 MY_Controller el cual usamos y extendemos.   
 
-### Presenters
+## Presenters
  
 Es frecuente el caso donde las vistas se tornan un tanto confusas según la app va agregando nuevas acciones; sobre este particular resultaría
 interesante  una lectura de [este post](http://jamieonsoftware.com/post/59690276326/codeigniter-view-presenters), escrito por Jamie Rumbelow y
@@ -159,7 +160,7 @@ y habríamos acabado.
 Agregando un nivel de abstracción hemos conseguido una vista sucinta y clara estéticamente, pero lo más importante es que 
 hemos practicado _DRY_.
 
-### Partials
+## Partials
 
 A veces repetimos bloques de código, por ejemplo en la construcción de una aplicación CRUD _replicaríamos_ el código del formulario
 para _agregar_ y _editar_ o también podríamos estar repitiendo código ya escrito antes cuando mostramos en una tabla los datos
@@ -215,7 +216,7 @@ Los datos en $result que usa la vista fueron obtenidos en el método del controla
 {lang="php"}
     $this->data['result'] = $this->paste->get_all();
 
-### Observers y callbacks
+## Observers y callbacks
 
 Muchas veces necesitas alterar el modelo antes que nuevos datos sean insertados.   
 ¿Cómo podría hacerse esto?    

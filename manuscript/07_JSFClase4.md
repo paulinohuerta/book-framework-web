@@ -3,6 +3,8 @@
 Si bien, en esta clase nos ocupamos de modificar la clase aceptando acciones de modificación y
 eliminación, al principio nos proponemos algunas indicaciones sobre el uso de parámetros.
 
+## Usando parámetros
+
 La etiqueta _f:param_ permite pasar parámetros a un componente, en el siguiente ejemplo vemos
 un uso de _f:param_ en un componente _h:outputFormat_
 
